@@ -11,7 +11,6 @@
     const trigger_value = $derived.by(()=>{
         if(select_type == "single"){
             let trigger_string = values.find((v)=>v.value == select_value)?.label ?? placeholder
-            console.log(trigger_string)
             return trigger_string
         }
         else{
@@ -19,7 +18,6 @@
                 select_value = []
             }
             let trigger_string = select_value.map((v)=>values.find((val)=>val.value == v)?.label).join(", ") ?? placeholder
-            console.log(trigger_string)
             return trigger_string
         }
     })

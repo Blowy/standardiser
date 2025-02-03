@@ -18,7 +18,7 @@
     
 
 </script>
-<div class="flex flex-col p-4">
+<div class="flex flex-col">
     {#if prose}
         <Card.Root class="rounded-none shadow-none">
             <Card.Header>
@@ -29,7 +29,7 @@
                             <span>Prose Block</span>
                         </Card.Description>
                     </div>
-                    <div class="flex gap-2">
+                    <!-- <div class="flex gap-2">
                         <Button variant="outline" size="icon" onclick={()=>{
                             sidebarState.setOpen(true)
                             sidebarState.setActiveItem(id)
@@ -38,7 +38,7 @@
                             <Edit></Edit>
                         </Button>
                         <Button variant="outline" size="icon"><Trash></Trash></Button>
-                    </div>
+                    </div> -->
                 </div>
             </Card.Header>
             <Card.Content>

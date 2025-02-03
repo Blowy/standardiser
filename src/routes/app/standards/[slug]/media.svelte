@@ -16,20 +16,20 @@
     
 
 </script>
-<div class="flex flex-col p-4">
+<div class="flex flex-col">
     {#if med}
         <Card.Root class="rounded-none shadow-none">
             <Card.Header>
                 <div class="flex flex-row justify-between items-center">
                     <div class="flex flex-col gap-2">
                         <Card.Description>
-                            <Card.Description class="flex flex-row gap-2">
+                            <Card.Description class="flex flex-row gap-2 items-center">
                                 <Image class="size-4"/>
                                 <span>Image Block</span>
                             </Card.Description>
                         </Card.Description>
                     </div>
-                    <div class="flex gap-2">
+                    <!-- <div class="flex gap-2">
                         <Button variant="outline" size="icon" onclick={()=>{
                             sidebarState.setOpen(true)
                             sidebarState.setActiveItem(id)
@@ -38,7 +38,7 @@
                             <Edit></Edit>
                         </Button>
                         <Button variant="outline" size="icon"><Trash></Trash></Button>
-                    </div>
+                    </div> -->
                 </div>
             </Card.Header>
             <Card.Content class="flex flex-col items-center grow-0">
