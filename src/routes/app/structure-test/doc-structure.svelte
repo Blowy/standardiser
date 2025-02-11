@@ -1,5 +1,5 @@
 <script lang="ts">
-    import DocStructureTest from './doc-structure-test.svelte'
+    import DocStructureTest from './doc-structure.svelte'
     import * as Accordion from "$lib/components/ui/accordion/index";
 	import {Button, buttonVariants} from '$lib/components/ui/button/index';
     import {Input} from '$lib/components/ui/input/index';
@@ -11,11 +11,12 @@
     import Requirement from '../standards/[slug]/requirement.svelte';
     import Prose from '../standards/[slug]/prose.svelte';
     import Media from '../standards/[slug]/media.svelte';
-    let {structure=$bindable(), editable=$bindable(), blockIndex=$bindable()} = $props()
+    let {structure=$bindable(), document=$bindable()} = $props()
 
     $effect(()=>{
         reassignBlockIds(structure)  
     })
+    let standardId = 5;
     
     let below_section_open = $state(false)
     let below_section_open_binding = $state(false)
@@ -55,11 +56,13 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
+                    blockId : newBlock.block_id,
                     clientId: 'Client ID Not yet set',
                     requirementText: 'New Requirement',
                     rationaleText: 'New Rationale',
                     guidanceText: 'New Guidance',
-                    documentStructure: JSON.stringify(structure)
+                    standardId: standardId,
+                    content: JSON.stringify(document)
                 })
             }).then(res => res.json()).then(data => data.id)
         }
@@ -262,7 +265,7 @@
                         </Accordion.Trigger>
                         <Accordion.Content class="px-4 pb-0">
                             {#if block.blocks.length>0}
-                                <DocStructureTest structure={block.blocks}/>
+                                <DocStructureTest structure={block.blocks} document={structure}/>
                             {:else}
                                 <p class="font-semibold text-muted-foreground pt-4">This section is empty, how would you like to populate it?</p>
                                 <div class="flex flex-row gap-4 py-4 w-1/2">

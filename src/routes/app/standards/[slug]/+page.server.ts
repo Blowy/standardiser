@@ -102,10 +102,14 @@ export const load = (async (event) => {
 
     const parent_data = await event.parent()
     const page_standard = parent_data.page_standard
+    const standard_id = parent_data.standard_id
     if (!page_standard)
     {
         error(404, "Standard not found")
     }
+    if(page_standard.content == null){
+        page_standard.content = []
+    }
 
-    return {page_standard, data_test};
+    return {page_standard, data_test, standard_id};
 }) satisfies PageServerLoad;

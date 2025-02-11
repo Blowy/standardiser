@@ -30,3 +30,4 @@ export const DELETE = async ({url}) => {
     await db.delete(tables.media).where(eq(tables.media.id, Number(id)))
     return new Response(JSON.stringify({message: "Deleted"}), {headers: {'content-type': 'application/json'}});
 }
+

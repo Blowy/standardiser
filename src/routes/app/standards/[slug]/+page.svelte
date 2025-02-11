@@ -21,6 +21,7 @@
     import ProseSidebar from './prose-sidebar.svelte';
     import MediaSidebar from './media-sidebar.svelte';
     import {sidebarState} from "./sidebar-state.svelte";
+    import DocStructure from './doc-structure.svelte';
 
     let sidebarActiveItem = $derived(sidebarState.getActiveItem());
     let sidebarActiveItemType = $derived(sidebarState.getActiveItemType());
@@ -28,15 +29,33 @@
 
     import * as Popover from "$lib/components/ui/popover/index"
 
-    import DocStructure from './doc-structure.svelte';
-
     let { data }: { data: PageData } = $props();
     
     let defaultOpen = data.data_test.standard.map((item:any)=>{
         return item.block_id.toString()
     })
 
-    let edit_structure = $state(false);
+    function createBlock(blockId:number, title:string|null, type:string|null =null){
+        const block:{block_id:number, title?:string, type?:string, blocks?:[], add_above_open:boolean, edit_title?:boolean} = {block_id:blockId, add_above_open:false}
+        if(title){
+            block.title = title
+            block.blocks = []
+            block.edit_title = false
+        }
+        if(type){
+            block.type = type
+        }
+        return block
+    }
+    function addSectionToEnd(structure:any, blockId:number, title:string){
+        const newSection = createBlock(blockId, title)
+        structure.push(newSection)
+        return newSection
+    }
+
+    let section_title = $state('')
+
+    let content:any = $state(data.page_standard?.content)
 </script>
 
 <Tabs.Root class="flex flex-col w-full h-full" value="requirements">
@@ -102,12 +121,12 @@
                     Export
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Content>
-                        <DropdownMenu.Item>Export Standard as Word Document</DropdownMenu.Item>
-                        <DropdownMenu.Item>Export Standard as Excel Document</DropdownMenu.Item>
-                        <DropdownMenu.Item>Export Alignment Traceability</DropdownMenu.Item>
-                        <DropdownMenu.Item>Export Items to Note</DropdownMenu.Item>
-                        <DropdownMenu.Item>Export Sources & Inputs</DropdownMenu.Item>
-                        <DropdownMenu.Item>Export All Items</DropdownMenu.Item>
+                    <DropdownMenu.Item>Export Standard as Word Document</DropdownMenu.Item>
+                    <DropdownMenu.Item>Export Standard as Excel Document</DropdownMenu.Item>
+                    <DropdownMenu.Item>Export Alignment Traceability</DropdownMenu.Item>
+                    <DropdownMenu.Item>Export Items to Note</DropdownMenu.Item>
+                    <DropdownMenu.Item>Export Sources & Inputs</DropdownMenu.Item>
+                    <DropdownMenu.Item>Export All Items</DropdownMenu.Item>
                 </DropdownMenu.Content>
             </DropdownMenu.Root>
         </div>
@@ -120,24 +139,37 @@
                     <Switch id="view-selector"/>
                     <Label for="view-selector">Table View</Label>
                 </div>
-                <ScrollArea class=" bg-sidebar border-t border-b px-4 py-2 h-[calc(100vh-14.25rem)] lg:h-[calc(100vh-11.25rem)]">
-                    {#if data.data_test.standard.length>0}
-                        <div class="w-full flex py-3 justify-end items-center">
-                            <Switch bind:checked={edit_structure}></Switch>
-                            <Label class="pl-2">Edit Document Structure</Label>
+                <ScrollArea class=" border-t border-b px-4 py-2 h-[calc(100vh-14.25rem)] lg:h-[calc(100vh-11.25rem)]">
+                    {#if content == null || content.length == 0}
+                        <div class="p-4">
+                            <Card.Root class="rounded-none">
+                                <Card.Header>
+                                    <Card.Title>
+                                        Welcome to your new Standard
+                                    </Card.Title>
+                                    <Card.Description>
+                                        Create a new section to get started
+                                    </Card.Description>
+                                </Card.Header>
+                                <Card.Content>
+                                    <div class="w-full flex flex-col gap-4">
+                                        <Label>
+                                            Section Title
+                                        </Label>
+                                        <Input type="text" bind:value={section_title} placeholder="Enter a Section Title"/>
+                                        <Button onclick={()=>{
+                                            addSectionToEnd(content, 1, section_title)
+                                            section_title = ''
+                                        }}>
+                                            <ListPlus></ListPlus>
+                                            <span>Add Section</span>
+                                        </Button>
+                                    </div>
+                                </Card.Content>
+                            </Card.Root>
                         </div>
-                    {/if}
-                    {#if data.data_test.standard.length==0}
-                    <div class="flex flex-row justify-center">
-                        <Button size="lg">
-                            <ListPlus></ListPlus>
-                            <span>Click to Add Section</span>
-                        </Button>
-                    </div>
                     {:else}
-                        <Accordion.Root type="multiple" value={defaultOpen} class="bg-background border p-4 pb-0">
-                            <DocStructure structure={data.data_test.standard} edit={edit_structure} level={1}/>
-                        </Accordion.Root>    
+                        <DocStructure structure={content} document={content} standard_id={data.standard_id}/>
                     {/if}
                 </ScrollArea>
             </div>
