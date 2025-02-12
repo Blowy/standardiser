@@ -252,5 +252,63 @@ export const actions:Actions = {
             moveType,
             parentId,
         )
+    },
+    moveElementComplex: async (event)=>{
+        console.log('Form Action Active - Move Element Complex')
+        const data = await event.request.formData()
+        console.log(data)
+        const id = data.get("moveElementStandardId") as string
+        const  initialContent = await db.select().from(tables.standards).where(eq(tables.standards.id, Number(id)))
+        if(initialContent[0].content === null){
+            initialContent[0].content = []
+        }
+        let elementId;
+        let parentId;
+        let futureParentId;
+        let neighbourId;
+        let position;
+        if(data.get('moveElementComplexId')==null || data.get('moveElementComplexId')== undefined || data.get('moveElementComplexId')==''){
+            error(500, {message: 'No Element ID Provided'})
+        } else {
+            elementId = parseInt(data.get('moveElementComplexId') as string)
+        }
+        if(data.get('moveElementComplexCurrentParentId')==null || data.get('moveElementComplexCurrentParentId')== undefined || data.get('moveElementComplexCurrentParentId')==''){
+            parentId = undefined
+        } else {
+            parentId = parseInt(data.get('moveElementComplexCurrentParentId') as string)
+        }
+        if(data.get('moveElementComplexFutureParentId')==null || data.get('moveElementComplexFutureParentId')== undefined || data.get('moveElementComplexFutureParentId')==''){
+            futureParentId = undefined
+        } else {
+            futureParentId = parseInt(data.get('moveElementComplexFutureParentId') as string)
+        }
+        if(data.get('moveElementComplexNeighbourId')==null || data.get('moveElementComplexNeighbourId')== undefined || data.get('moveElementComplexNeighbourId')==''){
+            neighbourId = undefined
+        } else {
+            neighbourId = parseInt(data.get('moveElementComplexNeighbourId') as string)
+        }
+        if(data.get('moveElementComplexPosition')==null || data.get('moveElementComplexPosition')== undefined){
+            position = "end" as ElementPosition
+        } else {
+            position = data.get('moveElementComplexPosition') as ElementPosition
+        }
+
+
+        let blocument;
+        if(id){
+            blocument = new Blocument(JSON.stringify(initialContent[0].content), parseInt(id))
+        } else {
+            error(500, {
+                message: 'No ID Provided'
+            })
+        }
+        blocument.serverMoveElementComplex(
+            elementId,
+            parentId,
+            futureParentId,
+            neighbourId,
+            position
+        )
     }
+    
 }

@@ -20,6 +20,9 @@
     let moveElementType = $state('up')
     let moveElementComplexNestInSection = $state(false)
     let moveElementPositionNear = $state(false)
+    let moveComplexBlockPosition = $state('start')
+    let moveElementComplexFutureParentToggle = $state(false)
+    let moveElementComplexNeighbourToggle = $state(false)
     let addBlockTypeString = $state('')
     let addBlockTypeValues = [
         {value:'requirement', label:'Requirement'},
@@ -186,8 +189,6 @@
         </section>
         <Separator/>
 
-        
-
         <!--Move Element - Simple -->
         <section>
             <div class=" p-4 flex flex-row gap-2 text-muted-foreground items-center bg-muted">
@@ -228,55 +229,59 @@
                 <span class="font-semibold text-sm">Move Element - Complex</span>
             </div>
             <Separator/>
-            <form method="post" action="?/moveElement" class="flex flex-col gap-4 p-4" use:enhance>
+            <form method="post" action="?/moveElementComplex" class="flex flex-col gap-4 p-4" use:enhance>
                 <input type="hidden" value={page.url.searchParams.get('id')} name="moveElementStandardId"/>
                 <div class="flex flex-col gap-2">
-                    <Label for="moveElementId">Section Element ID to Move</Label>
-                    <Input type="text" name="moveElementId" id="moveElementId" placeholder="Element ID to Move" class=" bg-background"/>
+                    <Label for="moveElementComplexId">Section Element ID to Move</Label>
+                    <Input type="text" name="moveElementComplexId" id="moveElementComplexId" placeholder="Element ID to Move" class=" bg-background"/>
                 </div>
                 <div class="flex flex-col gap-2">
-                    <Label for="moveElementId">Parent Element</Label>
-                    <Input type="text" name="moveElementParentId" id="moveElementParentId" placeholder="Parent Element Id" class=" bg-background"/>
+                    <Label for="moveElementCurrentParentId">Parent Element</Label>
+                    <Input type="text" name="moveElementComplexParentId" id="moveElementComplexParentId" placeholder="Parent Element Id" class=" bg-background"/>
                 </div>
-                <RadioGroup.Root name="moveElementType" bind:value={moveElementType} class="mt-2 ml-1">
-                    <div class="flex flex-row gap-4">
-                        <RadioGroup.Item value="up" id="moveElementUp" class="bg-background"/>
-                        <Label for="moveElementUp">Move Element Up</Label>
+                <div class="flex items-center gap-4">
+                    <Checkbox bind:checked={moveElementComplexFutureParentToggle} class="bg-background"/>
+                    <Label>Move into an existing section</Label>
+                </div>
+                {#if moveElementComplexFutureParentToggle}
+                    <div class="flex flex-col gap-2">
+                        <Label for="moveElementComplexFutureParentId">Move Element To Section Element ID</Label>
+                        <Input type="text" name="moveElementComplexFutureParentId" id="moveElementComplexFutureParentId" placeholder="Parent Section Element ID" class=" bg-background"/>
                     </div>
-                    <div class="flex flex-row gap-4">
-                        <RadioGroup.Item value="down" id="moveElementDown" class="bg-background"/>
-                        <Label for="moveElementDown">Move Element Down</Label>
+                {/if}
+                <div class="flex items-center gap-4">
+                    <Checkbox bind:checked={moveElementComplexNeighbourToggle} class="bg-background"/>
+                    <Label>Move relative to existing block</Label>
+                </div>
+                {#if moveElementComplexNeighbourToggle}
+                    <div class="flex flex-col gap-2">
+                        <Label for="moveElementComplexFutureNeighbourId">Move Element To Section Element ID</Label>
+                        <Input type="text" name="moveElementComplexFutureNeighbourId" id="moveElementComplexFutureNeighbourId" placeholder="Section Element ID" class=" bg-background"/>
                     </div>
-                    <!-- <div class="flex flex-row gap-4">
-                        <RadioGroup.Item value="complex" id="moveElementComplex" class="bg-background"/>
-                        <Label for="moveElementComplex">Move To...</Label>
-                    </div> -->
+                {/if}
+                <RadioGroup.Root name="moveElementComplexPosition" bind:value={moveComplexBlockPosition} class="mt-2 ml-1">
+                    {#if moveElementComplexNeighbourToggle == false}
+                        <div class="flex flex-row gap-4">
+                            <RadioGroup.Item value="start" id="moveComplexPositionStart" class="bg-background"/>
+                            <Label for="moveComplexPositionStart">Start of Parent</Label>
+                        </div>
+                        <div class="flex flex-row gap-4">
+                            <RadioGroup.Item value="end" id="moveComplexPositionEnd" class="bg-background"/>
+                            <Label for="moveComplexPositionEnd">End of Parent</Label>
+                        </div>
+                    {:else}
+                        <div class="flex flex-row gap-4">
+                            <RadioGroup.Item value="before" id="moveComplexPositionBefore" class="bg-background"/>
+                            <Label for="moveComplexPositionBefore">Before Existing Block</Label>
+                        </div>
+                        <div class="flex flex-row gap-4">
+                            <RadioGroup.Item value="after" id="moveComplexPositionAfter" class="bg-background"/>
+                            <Label for="moveComplexPositionAfter">After Existing Block</Label>
+                        </div>
+                    {/if}
                 </RadioGroup.Root>
-                <!-- {#if moveElementType == 'complex'}
-                    <div class="flex items-center gap-4">
-                        <Checkbox bind:checked={moveElementComplexNestInSection} class="bg-background"/>
-                        <Label for="addSectionPositionNear">Move into an existing section</Label>
-                    </div>
-                    {#if moveElementComplexNestInSection}
-                        <div class="flex flex-col gap-2">
-                            <Label for="moveElementComplexParentId">Move Element To Section Element ID</Label>
-                            <Input type="text" name="moveElementComplexParentId" id="moveElementComplexParentId" placeholder="Parent Section Element ID" class=" bg-background"/>
-                        </div>
-                    {/if}
-                    <div class="flex items-center gap-4">
-                        <Checkbox bind:checked={moveElementPositionNear} class="bg-background"/>
-                        <Label for="addSectionPositionNear">Move relative to existing block</Label>
-                    </div>
-                    {#if moveElementPositionNear}
-                        <div class="flex flex-col gap-2">
-                            <Label for="moveElementComplexId">Move Element To Section Element ID</Label>
-                            <Input type="text" name="moveElementComplexId" id="moveElementComplexId" placeholder="Section Element ID" class=" bg-background"/>
-                        </div>
-                    {/if}
-                {/if} -->
                 <Button type="submit" class="my-2">Move Element</Button>
             </form>
-            {moveElementType}
         </section>
         <Separator/>
 
@@ -335,14 +340,8 @@
     TODO: Refactor of all forms into hovering "form buttons"
     TODO: Hovering Add Between Buttons
     TODO: Bring in Sidebar for editing blocks
-
-
-    Move Up
-    Move Down
-    Edit
-    More
-        Delete
-            Modal
-        Complex Move
-            Modal
+    TODO: Refactor all class functions as try catch, with sufficient error messages, transaction style rollback if necessary
+    TODO: Refactor all class functions to "Return Early" as opposed to being deeply nested ifs.
+    TODO: Add return messages etc. to the class functions so that I can communicate failure to the end user
+    TODO: Sonner for successful adds/deletes/edits and for any failures
 -->
