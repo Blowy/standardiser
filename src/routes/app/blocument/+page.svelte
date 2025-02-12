@@ -6,7 +6,7 @@
     import {Checkbox} from '$lib/components/ui/checkbox/index'
     import CustomSelect from '$lib/components/custom-select.svelte';
     import DocumentStructure from './document-structure.svelte';
-    import {Blocks, Group, Trash, Edit, Move, ArrowUpDown} from 'lucide-svelte'
+    import {Blocks, Group, Trash, Edit, Move, ArrowUpDown, Lock} from 'lucide-svelte'
     import * as RadioGroup from '$lib/components/ui/radio-group/index';
     import {page} from '$app/state';
     import {enhance} from '$app/forms'
@@ -23,6 +23,7 @@
     let moveElementComplexPosition = $state('start')
     let moveElementComplexFutureParentToggle = $state(false)
     let moveElementComplexNeighbourToggle = $state(false)
+    let lockElementUser = $state('user 1')
     let addBlockTypeString = $state('')
     let addBlockTypeValues = [
         {value:'requirement', label:'Requirement'},
@@ -46,7 +47,36 @@
     </main>
     <aside class="flex flex-col bg-sidebar border-l w-1/4">
 
-        <!--Edit Section Title-->
+        <!--Lock a Block-->
+        <section>
+            <div class=" p-4 flex flex-row gap-2 text-muted-foreground items-center bg-muted">
+                <Lock class="size-4"/>
+                <span class="font-semibold text-sm">Lock an Element</span>
+            </div>
+            <Separator/>
+            <form method="post" action="?/lockElement" class="flex flex-col gap-4 p-4" use:enhance>
+                <input type="hidden" value={page.url.searchParams.get('id')} name="lockElementStandardId"/>
+                <div class="flex flex-col gap-2">
+                    <Label for="lockElementId">Element ID</Label>
+                    <Input type="text" name="lockElementId" id="lockElementId" placeholder="Element ID" class=" bg-background"/>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <RadioGroup.Root name="lockElementUser" bind:value={lockElementUser} class="mt-2 ml-1">
+                        <div class="flex flex-row gap-4">
+                            <RadioGroup.Item value="user 1" id="lockElementUser1" class="bg-background"/>
+                            <Label for="lockElementUser1">Lock as User 1</Label>
+                        </div>
+                        <div class="flex flex-row gap-4">
+                            <RadioGroup.Item value="user 2" id="lockElementUser2" class="bg-background"/>
+                            <Label for="lockElementUser2">Lock as User 2</Label>
+                        </div>
+                    </RadioGroup.Root>
+                </div>
+                <Button type="submit" class="my-2">Lock Element</Button>
+            </form>
+        </section>
+        <Separator/>
+        <!--Add Section-->
         <section>
             <div class=" p-4 flex flex-row gap-2 text-muted-foreground items-center bg-muted">
                 <Group class="size-4"/>
@@ -330,8 +360,7 @@
     </aside>
 </div>
 
-<!--TODO: Complex Moves
-    TODO: Locking of Individual Block
+<!--TODO: Locking of Individual Block
     TODO: Locking of Document Structure
     TODO: Updating clients when there is a change
     TODO: Accordions for Sections

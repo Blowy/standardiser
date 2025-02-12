@@ -1,14 +1,16 @@
 type Section = {
     title: string,
     block_id: number,
-    blocks: Element[]
+    blocks: Element[],
+    locked: {state: boolean, user:string}|false
 }
 export type BlockType = "requirement"|"prose"|"media"
 
 type Block = {
     block_id: number,
     type: BlockType,
-    db_id: number
+    db_id: number,
+    locked: {state: boolean, user:string}|false
 }
 export type Element = Section|Block|null
 export type ElementPosition = "end"|"start"|"after"|"before"
@@ -22,13 +24,8 @@ import * as tables from "$lib/server/db/schema"
 
 export class Blocument{
     constructor(documentString:string, document_id:number){
-        //console.log('Blocument Constructor')
         this.document = JSON.parse(documentString)
-        //console.log('Document parsed')
-        //console.log(this.document)
         this.document_id = Number(document_id)
-        //console.log('Document ID Set')
-        //console.log(this.document_id)
     }
     document:DocumentContent
     document_id:number
@@ -138,7 +135,8 @@ export class Blocument{
         const newSection:Section = {
             title: title,
             block_id: this.getHighestBlockId()+1,
-            blocks: []
+            blocks: [],
+            locked: false
         }
         console.log("new section generated:")
         console.table([{title: newSection.title, block_id: newSection.block_id, blocks: newSection.blocks}])
@@ -275,7 +273,8 @@ export class Blocument{
         const newBlock:Block = {
             type: blockType,
             block_id: this.getHighestBlockId()+1,
-            db_id: 0
+            db_id: 0,
+            locked: false
         }
         console.log("new section generated:")
         console.table([{title: newBlock.type, block_id: newBlock.block_id, db_id: newBlock.db_id}])
