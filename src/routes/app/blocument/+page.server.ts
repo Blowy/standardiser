@@ -309,6 +309,40 @@ export const actions:Actions = {
             neighbourId,
             position
         )
+    },
+    lockElement: async (event)=>{
+        console.log('Form Action Active - Lock Element')
+        const data = await event.request.formData()
+        console.log(data)
+        const id = data.get("lockElementStandardId") as string
+        const  initialContent = await db.select().from(tables.standards).where(eq(tables.standards.id, Number(id)))
+        if(initialContent[0].content === null){
+            initialContent[0].content = []
+        }
+        let lockElementId;
+        let lockElementUserId
+        if(data.get('lockElementId')==null || data.get('lockElementId')== undefined || data.get('lockElementId')==''){
+            error(500, {message: 'No Element ID Provided'})
+        } else {
+            lockElementId = parseInt(data.get('lockElementId') as string)
+        }
+        if(data.get('lockElementUserId')==null || data.get('lockElementUserId')== undefined || data.get('lockElementUserId')==''){
+            error(500, {message: 'No User ID Provided'})
+        } else {
+            lockElementUserId = parseInt(data.get('lockElementUserId') as string)
+        }
+        let blocument;
+        if(id){
+            blocument = new Blocument(JSON.stringify(initialContent[0].content), parseInt(id))
+        } else {
+            error(500, {
+                message: 'No ID Provided'
+            })
+        }
+        blocument.serverLockElement(
+            lockElementId,
+            lockElementUserId
+        )
     }
     
 }
