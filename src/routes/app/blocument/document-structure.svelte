@@ -2,6 +2,7 @@
     let {structure} = $props()
     import DocumentStructure from "./document-structure.svelte"
     import * as Card from "$lib/components/ui/card/index";
+    import * as Tooltip from "$lib/components/ui/tooltip/index";
     import {Lock, LockOpen} from "lucide-svelte"
     
     console.log(structure)
@@ -20,7 +21,7 @@
                                 {element.block_id}
                             </Card.Description>
                         </div>
-                        {#if element.locked == true}
+                        {#if element.locked.state == true}
                             <Lock class="text-red-500 size-4"/>
                         {/if}
                     </div>
@@ -46,8 +47,18 @@
                                 {element.block_id}
                             </Card.Description>
                         </div>
-                        {#if element.locked == true}
-                            <Lock class="text-red-500 size-4"/>
+                        {#if element.locked.state == true}
+                        <Tooltip.Provider>
+                            <Tooltip.Root>
+                                <Tooltip.Trigger>
+                                    <Lock class="text-red-500 size-4"/>
+                                </Tooltip.Trigger>
+                                <Tooltip.Content>
+                                    <p>Locked for editing by {element.locked.user}</p>
+                                </Tooltip.Content>
+                            </Tooltip.Root>
+                        </Tooltip.Provider>
+                            
                         {/if}
                     </div>
                 </Card.Header>

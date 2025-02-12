@@ -6,7 +6,7 @@
     import {Checkbox} from '$lib/components/ui/checkbox/index'
     import CustomSelect from '$lib/components/custom-select.svelte';
     import DocumentStructure from './document-structure.svelte';
-    import {Blocks, Group, Trash, Edit, Move, ArrowUpDown, Lock} from 'lucide-svelte'
+    import {Blocks, Group, Trash, Edit, Move, ArrowUpDown, Lock, LockOpen} from 'lucide-svelte'
     import * as RadioGroup from '$lib/components/ui/radio-group/index';
     import {page} from '$app/state';
     import {enhance} from '$app/forms'
@@ -24,6 +24,7 @@
     let moveElementComplexFutureParentToggle = $state(false)
     let moveElementComplexNeighbourToggle = $state(false)
     let lockElementUser = $state('user 1')
+    let unlockElementUser = $state('user 1')
     let addBlockTypeString = $state('')
     let addBlockTypeValues = [
         {value:'requirement', label:'Requirement'},
@@ -73,6 +74,35 @@
                     </RadioGroup.Root>
                 </div>
                 <Button type="submit" class="my-2">Lock Element</Button>
+            </form>
+        </section>
+        <Separator/>
+        <!--Unlock a Block-->
+        <section>
+            <div class=" p-4 flex flex-row gap-2 text-muted-foreground items-center bg-muted">
+                <LockOpen class="size-4"/>
+                <span class="font-semibold text-sm">Unlock an Element</span>
+            </div>
+            <Separator/>
+            <form method="post" action="?/unlockElement" class="flex flex-col gap-4 p-4" use:enhance>
+                <input type="hidden" value={page.url.searchParams.get('id')} name="unlockElementStandardId"/>
+                <div class="flex flex-col gap-2">
+                    <Label for="unlockElementId">Element ID</Label>
+                    <Input type="text" name="unlockElementId" id="unlockElementId" placeholder="Element ID" class=" bg-background"/>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <RadioGroup.Root name="unlockElementUser" bind:value={unlockElementUser} class="mt-2 ml-1">
+                        <div class="flex flex-row gap-4">
+                            <RadioGroup.Item value="user 1" id="unlockElementUser1" class="bg-background"/>
+                            <Label for="unlockElementUser1">Unlock as User 1</Label>
+                        </div>
+                        <div class="flex flex-row gap-4">
+                            <RadioGroup.Item value="user 2" id="unlockElementUser2" class="bg-background"/>
+                            <Label for="unlockElementUser2">Unlock as User 2</Label>
+                        </div>
+                    </RadioGroup.Root>
+                </div>
+                <Button type="submit" class="my-2">Unock Element</Button>
             </form>
         </section>
         <Separator/>
@@ -360,8 +390,7 @@
     </aside>
 </div>
 
-<!--TODO: Locking of Individual Block
-    TODO: Locking of Document Structure
+<!--TODO: Locking of Document Structure
     TODO: Updating clients when there is a change
     TODO: Accordions for Sections
     TODO: Block Components for the different types of blocks

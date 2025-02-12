@@ -360,6 +360,11 @@ export class Blocument{
             await db.transaction(async (tx)=>{
                 console.log('Blocument Function - Server Delete Block')
                 const block = Blocument.getElementById(this.document, id)
+                if(block){
+                    if(block.locked != false){
+                        throw new Error("Block is locked")
+                    }
+                }
                 console.log(block)
                 if (parentId){
                     console.log("Parent ID Provided")
@@ -627,6 +632,35 @@ export class Blocument{
             await db.update(tables.standards).set({content: JSON.stringify(this.document)}).where(eq(tables.standards.id, this.document_id))
         } catch(err){
             console.error('Complex Move Failed', err)
+        }
+    }
+
+    async serverLockElement(id:number, userId:string){
+        console.log('Blocument Function - Server Lock Element')
+        const element = Blocument.getElementById(this.document, id)
+        if (element){
+            if(element.locked == false){
+                element.locked ={state: true, user: userId}
+                await db.update(tables.standards).set({content: JSON.stringify(this.document)}).where(eq(tables.standards.id, this.document_id))
+            } else {
+                console.error("Element is already locked")
+            }
+        }
+    }
+    async serverUnlockElement(id:number, userId:string){
+        console.log('Server Unlock Element')
+        const element = Blocument.getElementById(this.document, id)
+        if(element){
+            if(element.locked == false){
+                console.error("Element is not locked")
+            } else {
+                if(element.locked.user == userId){
+                    element.locked = false
+                    await db.update(tables.standards).set({content: JSON.stringify(this.document)}).where(eq(tables.standards.id, this.document_id))
+                } else {
+                    console.error("Element is locked by another user")
+                }
+            }
         }
     }
 }

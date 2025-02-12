@@ -320,16 +320,16 @@ export const actions:Actions = {
             initialContent[0].content = []
         }
         let lockElementId;
-        let lockElementUserId
+        let lockElementUser
         if(data.get('lockElementId')==null || data.get('lockElementId')== undefined || data.get('lockElementId')==''){
             error(500, {message: 'No Element ID Provided'})
         } else {
             lockElementId = parseInt(data.get('lockElementId') as string)
         }
-        if(data.get('lockElementUserId')==null || data.get('lockElementUserId')== undefined || data.get('lockElementUserId')==''){
+        if(data.get('lockElementUser')==null || data.get('lockElementUser')== undefined || data.get('lockElementUser')==''){
             error(500, {message: 'No User ID Provided'})
         } else {
-            lockElementUserId = parseInt(data.get('lockElementUserId') as string)
+            lockElementUser = data.get('lockElementUser') as string
         }
         let blocument;
         if(id){
@@ -341,7 +341,41 @@ export const actions:Actions = {
         }
         blocument.serverLockElement(
             lockElementId,
-            lockElementUserId
+            lockElementUser
+        )
+    }, 
+    unlockElement: async (event)=>{
+        console.log('Form Action Active - Unlock Element')
+        const data = await event.request.formData()
+        console.log(data)
+        const id = data.get("unlockElementStandardId") as string
+        const  initialContent = await db.select().from(tables.standards).where(eq(tables.standards.id, Number(id)))
+        if(initialContent[0].content === null){
+            initialContent[0].content = []
+        }
+        let unlockElementId;
+        let unlockElementUser
+        if(data.get('unlockElementId')==null || data.get('unlockElementId')== undefined || data.get('unlockElementId')==''){
+            error(500, {message: 'No Element ID Provided'})
+        } else {
+            unlockElementId = parseInt(data.get('unlockElementId') as string)
+        }
+        if(data.get('unlockElementUser')==null || data.get('unlockElementUser')== undefined || data.get('unlockElementUser')==''){
+            error(500, {message: 'No User ID Provided'})
+        } else {
+            unlockElementUser = data.get('unlockElementUser') as string
+        }
+        let blocument;
+        if(id){
+            blocument = new Blocument(JSON.stringify(initialContent[0].content), parseInt(id))
+        } else {
+            error(500, {
+                message: 'No ID Provided'
+            })
+        }
+        blocument.serverUnlockElement(
+            unlockElementId,
+            unlockElementUser
         )
     }
     
