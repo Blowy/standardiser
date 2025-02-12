@@ -272,20 +272,20 @@ export const actions:Actions = {
         } else {
             elementId = parseInt(data.get('moveElementComplexId') as string)
         }
-        if(data.get('moveElementComplexCurrentParentId')==null || data.get('moveElementComplexCurrentParentId')== undefined || data.get('moveElementComplexCurrentParentId')==''){
+        if(data.get('moveElementComplexParentId')==null || data.get('moveElementComplexParentId')== undefined || data.get('moveElementComplexParentId')==''){
             parentId = undefined
         } else {
-            parentId = parseInt(data.get('moveElementComplexCurrentParentId') as string)
+            parentId = parseInt(data.get('moveElementComplexParentId') as string)
         }
         if(data.get('moveElementComplexFutureParentId')==null || data.get('moveElementComplexFutureParentId')== undefined || data.get('moveElementComplexFutureParentId')==''){
             futureParentId = undefined
         } else {
             futureParentId = parseInt(data.get('moveElementComplexFutureParentId') as string)
         }
-        if(data.get('moveElementComplexNeighbourId')==null || data.get('moveElementComplexNeighbourId')== undefined || data.get('moveElementComplexNeighbourId')==''){
+        if(data.get('moveElementComplexFutureNeighbourId')==null || data.get('moveElementComplexFutureNeighbourId')== undefined || data.get('moveElementComplexFutureNeighbourId')==''){
             neighbourId = undefined
         } else {
-            neighbourId = parseInt(data.get('moveElementComplexNeighbourId') as string)
+            neighbourId = parseInt(data.get('moveElementComplexFutureNeighbourId') as string)
         }
         if(data.get('moveElementComplexPosition')==null || data.get('moveElementComplexPosition')== undefined){
             position = "end" as ElementPosition

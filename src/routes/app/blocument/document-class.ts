@@ -480,153 +480,153 @@ export class Blocument{
         Blocument.resequenceBlockIds(this.document, 1)
         await db.update(tables.standards).set({content: JSON.stringify(this.document)}).where(eq(tables.standards.id, this.document_id))
     }
-    async serverMoveElementComplex(id: number, parentId?: number, futureSectionId?: number, neighbourElementId?: number, position:ElementPosition = "end" ){
-        console.log('Blocument Function - Server Move Element Complex')
+
+    async serverMoveElementComplex(id: number, parentId?:number, futureSectionId?:number, neighbourElementId?: number, position: ElementPosition = "end"){
+        console.log('Server Move Complex')
         console.table([{id, parentId, futureSectionId, neighbourElementId, position}])
-        if(parentId && isNaN(parentId)==false){
-            const parentSection = Blocument.getElementById(this.document, parentId)
-            if(parentSection && 'blocks' in parentSection && parentSection.blocks.length >0){
-                const index = parentSection.blocks.findIndex(element => element && element.block_id === id)
-                if (index > -1){
-                    const element = parentSection.blocks[index]
+        try{
+            if(parentId){
+                const parentSection = Blocument.getElementById(this.document, parentId)
+                if(parentSection && 'blocks' in parentSection && parentSection.blocks.length>0){
+                    const index = parentSection.blocks.findIndex(element => element && element.block_id === id)
+                    if(index > -1){
+                        const element = parentSection.blocks[index]
+                        if(futureSectionId){
+                            const futureSection = Blocument.getElementById(this.document, futureSectionId)
+                            if(futureSection && 'blocks' in futureSection){
+                                if(neighbourElementId){
+                                    const neighbourIndex = futureSection.blocks.findIndex(element => element && element.block_id === neighbourElementId)
+                                    if(neighbourIndex > -1){
+                                        if(position && (position == 'after' || position == 'before')){
+                                            if (position == 'after'){
+                                                futureSection.blocks.splice(neighbourIndex + 1, 0, element)
+                                            } else if (position == 'before'){
+                                                futureSection.blocks.splice(neighbourIndex, 0, element)
+                                            }
+                                        } else {
+                                            throw new Error("Invalid position")
+                                        }
+                                    } else {
+                                        throw new Error("Neighbour element not found")
+                                    }
+                                } else {
+                                    if(position && (position == 'end' || position == 'start')){
+                                        if (position == 'end'){
+                                            futureSection.blocks.push(element)
+                                        } else if (position == 'start'){
+                                            futureSection.blocks.unshift(element)
+                                        }
+                                    } else {
+                                        throw new Error("Invalid position")
+                                    }
+                                }
+                            } else {
+                                throw new Error("Valid future section not found")
+                            }
+                        } else {
+                            if(neighbourElementId){
+                                const neighbourIndex = this.document.findIndex(element => element && element.block_id === neighbourElementId)
+                                if(neighbourIndex > -1){
+                                    if(position && (position == 'after' || position == 'before')){
+                                        if (position == 'after'){
+                                            this.document.splice(neighbourIndex + 1, 0, element)
+                                        } else if (position == 'before'){
+                                            this.document.splice(neighbourIndex, 0, element)
+                                        }
+                                    } else {
+                                        throw new Error("Invalid position")
+                                    }
+                                } else {
+                                    throw new Error("Neighbour element not found in document")
+                                }
+                            } else {
+                                if(position && (position == 'end' || position == 'start')){
+                                    if (position == 'end'){
+                                        this.document.push(element)
+                                    } else if (position == 'start'){
+                                        this.document.unshift(element)
+                                    }
+                                } else {
+                                    throw new Error("Invalid position")
+                                }
+                            }
+                        }
+                        parentSection.blocks.splice(index, 1)
+                    } else {
+                        throw new Error("Element not found in parent section")
+                    }
+                } else{
+                    throw new Error("Valid parent section not found")
+                }
+            } else {
+                const index = this.document.findIndex(element => element && element.block_id === id)
+                if(index > -1){
+                    const element = this.document[index]
                     if(futureSectionId){
                         const futureSection = Blocument.getElementById(this.document, futureSectionId)
                         if(futureSection && 'blocks' in futureSection){
                             if(neighbourElementId){
-                                if(futureSection.blocks.length > 0){
-                                    const neighbourIndex = futureSection.blocks.findIndex(element => element && element.block_id === neighbourElementId)
-                                    if(neighbourIndex > -1){
-                                        if(position == 'after'){
-                                            futureSection.blocks.splice(neighbourIndex + 1, 0, element)
-                                        } else if (position == 'before'){
-                                            futureSection.blocks.splice(neighbourIndex, 0, element)
-                                        } else {
-                                            console.error("Invalid position")
-                                            return
-                                        }
+                                const neighbourIndex = futureSection.blocks.findIndex(element => element && element.block_id === neighbourElementId)
+                                if(neighbourIndex > -1){
+                                    if(position == 'after'){
+                                        futureSection.blocks.splice(neighbourIndex + 1, 0, element)
+                                    } else if (position == 'before'){
+                                        futureSection.blocks.splice(neighbourIndex, 0, element)
                                     } else {
-                                        console.error("Neighbour element not found")
-                                        return
+                                        throw new Error("Invalid position")
                                     }
                                 } else {
-                                    console.error("Future section does not have blocks. As such, it cannot have neighbours")
-                                    return
+                                    throw new Error("Neighbour element not found")
                                 }
                             } else {
-                                if (position == 'end'){
-                                    futureSection.blocks.push(element)
-                                } else if (position == 'start'){
-                                    futureSection.blocks.unshift(element)
+                                if(position && (position == 'end' || position == 'start')){
+                                    if (position == 'end'){
+                                        futureSection.blocks.push(element)
+                                    } else if (position == 'start'){
+                                        futureSection.blocks.unshift(element)
+                                    }
                                 } else {
-                                    console.error("Invalid position")
-                                    return
+                                    throw new Error("Invalid position")
                                 }
                             }
                         } else {
-                            console.error("Valid future section not found")
-                            return
+                            throw new Error("Valid future section not found")
                         }
                     } else {
                         if(neighbourElementId){
-                            const neighbourIndex = this.document.findIndex(element => element && element.block_id === neighbourElementId)
+                            const neighbourIndex = this.document.findIndex(element => element && element.block_id == neighbourElementId)
                             if(neighbourIndex > -1){
-                                if(position == 'after'){
-                                    this.document.splice(neighbourIndex + 1, 0, element)
-                                } else if (position == 'before'){
-                                    this.document.splice(neighbourIndex, 0, element)
-                                } else {
-                                    console.error("Invalid position")
-                                    return
-                                }
-                            }
-                        } else {
-                            console.error("Not enough information to determine position")
-                            return
-                        } 
-                    }
-                } else{
-                    console.error("Element not found in parent section")
-                    return
-                }
-                parentSection.blocks.splice(index, 1)
-            } else {
-                console.error("Valid parent section not found. Check that the parent ID is correct.")
-                return
-            }
-        } else {
-            const index = this.document.findIndex(element => element && element.block_id === id)
-            if (index > -1){
-                const element = this.document[index]
-                if(futureSectionId){
-                    const futureSection = Blocument.getElementById(this.document, futureSectionId)
-                    if(futureSection){
-                        if('blocks' in futureSection){
-                            if(neighbourElementId){
-                                if(futureSection.blocks.length > 0){
-                                    const neighbourIndex = futureSection.blocks.findIndex(element => element && element.block_id === neighbourElementId)
-                                    if(neighbourIndex > -1){
-                                        if(position == 'after'){
-                                            futureSection.blocks.splice(neighbourIndex + 1, 0, element)
-                                        } else if (position == 'before'){
-                                            futureSection.blocks.splice(neighbourIndex, 0, element)
-                                        } else {
-                                            console.error("Invalid position")
-                                            return
-                                        }
-                                    } else {
-                                        console.error("Neighbour element not found")
-                                        return
+                                if(position && (position == 'after' || position == 'before')){
+                                    if (position == 'after'){
+                                        this.document.splice(neighbourIndex + 1, 0, element)
+                                    } else if (position == 'before'){
+                                        this.document.splice(neighbourIndex, 0, element)
                                     }
                                 } else {
-                                    console.error("Future section does not have blocks. As such, it cannot have neighbours")
-                                    return
+                                    throw new Error("Invalid position")
                                 }
                             } else {
-                                if (position == 'end'){
-                                    futureSection.blocks.push(element)
-                                } else if (position == 'start'){
-                                    futureSection.blocks.unshift(element)
-                                } else {
-                                    console.error("Invalid position")
-                                    return
-                                }
+                                throw new Error("Neighbour element not found in document")
                             }
                         } else {
-                            console.error("Future section does not have blocks array attribute. Cannot be a section")
-                            return
-                        }
-                    } else {
-                        console.error("Future section not found")
-                        return
-                    }
-                } else {
-                    if(neighbourElementId){
-                        const neighbourIndex = this.document.findIndex(element => element && element.block_id === neighbourElementId)
-                        if(neighbourIndex > -1){
-                            if(position == 'after'){
-                                this.document.splice(neighbourIndex + 1, 0, element)
-                            } else if (position == 'before'){
-                                this.document.splice(neighbourIndex, 0, element)
+                            if(position && (position == 'end' || position == 'start')){
+                                if (position == 'end'){
+                                    this.document.push(element)
+                                } else if (position == 'start'){
+                                    this.document.unshift(element)
+                                }
                             } else {
-                                console.error("Invalid position")
-                                return
-                            }    
-                        } else {
-                            console.error("Neighbour element not found")
-                            return
+                                throw new Error("Invalid position")
+                            }
                         }
-                    } else{
-                        console.error("Not enough information to determine position")
-                        return
                     }
+                    this.document.splice(index, 1)
+                } else {
+                    throw new Error("Element not found in document")
                 }
-            } else {
-                console.error("Element not found in document")
-                return
             }
-            this.document.splice(index, 1)
+        } catch(err){
+            console.error('Complex Move Failed', err)
         }
-        Blocument.resequenceBlockIds(this.document, 1)
-        await db.update(tables.standards).set({content: JSON.stringify(this.document)}).where(eq(tables.standards.id, this.document_id))        
     }
 }

@@ -20,7 +20,7 @@
     let moveElementType = $state('up')
     let moveElementComplexNestInSection = $state(false)
     let moveElementPositionNear = $state(false)
-    let moveComplexBlockPosition = $state('start')
+    let moveElementComplexPosition = $state('start')
     let moveElementComplexFutureParentToggle = $state(false)
     let moveElementComplexNeighbourToggle = $state(false)
     let addBlockTypeString = $state('')
@@ -218,7 +218,6 @@
                 </RadioGroup.Root>
                 <Button type="submit" class="my-2">Move Element</Button>
             </form>
-            {moveElementType}
         </section>
         <Separator/>
 
@@ -259,7 +258,7 @@
                         <Input type="text" name="moveElementComplexFutureNeighbourId" id="moveElementComplexFutureNeighbourId" placeholder="Section Element ID" class=" bg-background"/>
                     </div>
                 {/if}
-                <RadioGroup.Root name="moveElementComplexPosition" bind:value={moveComplexBlockPosition} class="mt-2 ml-1">
+                <RadioGroup.Root name="moveElementComplexPosition" bind:value={moveElementComplexPosition} class="mt-2 ml-1">
                     {#if moveElementComplexNeighbourToggle == false}
                         <div class="flex flex-row gap-4">
                             <RadioGroup.Item value="start" id="moveComplexPositionStart" class="bg-background"/>
