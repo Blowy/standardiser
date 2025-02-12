@@ -625,6 +625,7 @@ export class Blocument{
                     throw new Error("Element not found in document")
                 }
             }
+            await db.update(tables.standards).set({content: JSON.stringify(this.document)}).where(eq(tables.standards.id, this.document_id))
         } catch(err){
             console.error('Complex Move Failed', err)
         }
