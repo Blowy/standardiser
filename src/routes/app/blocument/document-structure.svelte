@@ -9,33 +9,56 @@
     import {Separator} from "$lib/components/ui/separator/index"
     import {Input} from "$lib/components/ui/input/index"
     import {Lock, LockOpen, Edit, MoveUp, Trash, MoveDown, Pilcrow, CirclePlus, ListStart, Image, ListChecks, } from "lucide-svelte"
+    import type {Element} from "./document-class"
     
+    type StructureMapObject = {
+        addAboveOpen: boolean
+    }
+    
+    let structureMap=$state<StructureMapObject[]>(structure.map(() => {
+        return {
+            addAboveOpen: false,
+        }
+    }))
+    let accordionOpenArray = $state<string[]>([])
+    accordionOpenArray = structure.map((element:Element) => {
+        if (element && Object.hasOwn(element, 'title')) {
+            return `section-${element.block_id}`
+        }
+    })
     console.log(structure)
+    $inspect(structureMap)
 </script>
 <div class="flex flex-col">
     {#each structure as element, i}
         <div class="w-full flex flex-row justify-center ">
             <div class="relative group/add-above w-full mt-2">
-                <div class={"opacity-0 group-hover/add-above:opacity-100 absolute items-center w-full transition-opacity duration-300"}>
-                    <Popover.Root>
-                        <Popover.Trigger class="w-full">
+                <div class={structureMap[i].addAboveOpen == true ? "opacity-100 absolute items-center w-full": "opacity-0 group-hover/add-above:opacity-100 absolute items-center w-full transition-opacity duration-300"}>
+                    <Popover.Root bind:open={structureMap[i].addAboveOpen}>
+                        <Popover.Trigger class="w-full" >
                             {#snippet child({props})}
                                 <div {...props} class="flex flex-col items-center w-full">
-                                    <Button variant="outline" size="icon" class="z-10 ring-2 ring-offset-2 ring-blue-500">
+                                    <Button variant="outline" size="icon" class="z-10 ring-2 ring-offset-2 ring-blue-500" >
                                         <CirclePlus/>
                                     </Button>
                                     <Separator class="border-blue-500 border-2 absolute top-4 z-0 w-full"/>
                                 </div>
                             {/snippet}
                         </Popover.Trigger>
+                        <Popover.Content class="w-full">
+                            <div class="flex flex-col gap-2">
+                                <Input placeholder="Add Section" class="w-full"/>
+                                <Button variant="default" class="w-full">Add Section</Button>
+                            </div>
+                        </Popover.Content>
                     </Popover.Root>
                 </div>
-                <div class={"transition-height delay-75 duration-300  h-4 group-hover/add-above:h-11"}></div>
+                <div class={structureMap[i].addAboveOpen == true ? "transition-height delay-75 duration-300 h-11" :"transition-height delay-75 duration-300  h-4 group-hover/add-above:h-11"}></div>
             </div>
         </div>
         {#if Object.hasOwn(element, 'title')}
-            <Accordion.Root type="multiple" class="border border-1">
-                <Accordion.Item>
+            <Accordion.Root type="multiple" class="border border-1" bind:value={accordionOpenArray}>
+                <Accordion.Item value={`section-${element.block_id}`}>
                     <div class="group/edit-bar relative w-full">
                         <div class="absolute top-3 right-14 transition-opacity duration-300 opacity-0 group-hover/edit-bar:opacity-100">
                             <div class="flex flex-row ">
