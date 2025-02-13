@@ -16,6 +16,7 @@ export default{
 			}
 		},
 		extend: {
+			transitionProperty:{'height': 'height'},
 			colors: {
 				border: 'hsl(var(--border) / <alpha-value>)',
 				input: 'hsl(var(--input) / <alpha-value>)',

@@ -392,13 +392,11 @@
 
 <!--TODO: Locking of Document Structure
     TODO: Updating clients when there is a change
-    TODO: Accordions for Sections
     TODO: Block Components for the different types of blocks
     TODO: Refactor of all forms into hovering "form buttons"
     TODO: Hovering Add Between Buttons
     TODO: Bring in Sidebar for editing blocks
     TODO: Refactor all class functions as try catch, with sufficient error messages, transaction style rollback if necessary
-    TODO: Refactor all class functions to "Return Early" as opposed to being deeply nested ifs.
     TODO: Add return messages etc. to the class functions so that I can communicate failure to the end user
     TODO: Sonner for successful adds/deletes/edits and for any failures
 -->
