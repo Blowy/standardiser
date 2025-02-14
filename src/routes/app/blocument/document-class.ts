@@ -13,9 +13,9 @@ type Block = {
     locked: {state: boolean, user:string}|false
 }
 export type Element = Section|Block|null
-export type ElementPosition = "end"|"start"|"after"|"before"
 export type DocumentContent = Element[]
 export type MoveType = "up"|"down"|"complex"
+export type ElementPosition = "end"|"start"|"after"|"before"
 
 import {db} from "$lib/server/db/index"
 import {eq} from "drizzle-orm"

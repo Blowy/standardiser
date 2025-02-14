@@ -16,7 +16,7 @@ export const load:PageServerLoad = async (request) => {
         if(document[0].content === null){
             document = []
         } else {
-            document = document[0].content
+            document = document[0].content as string
         }
     }
     return {document: document}  
@@ -32,6 +32,7 @@ export const actions:Actions = {
         if(initialContent[0].content === null){
             initialContent[0].content = []
         }
+        console.log('here...')
         let title;
         let parentId;
         let neighbour;
