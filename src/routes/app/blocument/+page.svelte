@@ -43,7 +43,7 @@
             {#if document.length == 0}
                 <p class="text-muted-foreground">Empty Document</p>
             {/if}
-            <DocumentStructure structure={data.document} documentId={page.url.searchParams.get('id')}/>
+            <DocumentStructure structure={data.document} documentId={page.url.searchParams.get('id')} />
         {/if}
     </main>
     <aside class="flex flex-col bg-sidebar border-l w-1/4">

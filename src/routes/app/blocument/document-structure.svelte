@@ -1,5 +1,5 @@
 <script lang="ts">
-    let {structure, documentId} = $props()
+    let {structure, documentId, parentId=undefined} = $props()
     import DocumentStructure from "./document-structure.svelte"
     import * as Accordion from "$lib/components/ui/accordion/index"
     import * as Card from "$lib/components/ui/card/index";
@@ -18,7 +18,7 @@
     }
     
     let structureMap = $state<StructureMapObject[]>()
-    
+    let accordionOpenArray = $state<string[]>([])
     $effect.pre(()=>{
         structureMap = structure.map(() => {
             return {
@@ -26,13 +26,14 @@
                 newSectionInput: false,
             }
         })
-    })
-    let accordionOpenArray = $state<string[]>([])
-    accordionOpenArray = structure.map((element:Element) => {
+        accordionOpenArray = structure.map((element:Element) => {
         if (element && Object.hasOwn(element, 'title')) {
             return `section-${element.block_id}`
         }
     })
+    })
+    
+    
     console.log(structure)
     $inspect(structureMap)
 </script>
@@ -67,7 +68,7 @@
                                             <input type='hidden' name="addSectionStandardId" value={documentId} />
                                             <input type='hidden' name="addSectionNeighbourId" value={element.block_id} />
                                             <input type='hidden' name='addSectionPosition' value="before"/>
-                                            <input type='hidden' name='addSectionParentId' value={undefined}/> 
+                                            <input type='hidden' name='addSectionParentId' value={parentId}/> 
                                             <Input class="" placeholder="New Section" name="addSectionTitle"/>
                                             <Button variant="default" type="submit"><ListStart/></Button>
                                         </form>
@@ -77,7 +78,7 @@
                                             <input type="hidden" name="addBlockStandardId" value={documentId} />
                                             <input type="hidden" name="addBlockNeighbourId" value={element.block_id} />
                                             <input type="hidden" name="addBlockPosition" value="before"/>
-                                            <input type="hidden" name="addBlockParentId" value={undefined}/>
+                                            <input type="hidden" name="addBlockParentId" value={parentId}/>
                                             <input type="hidden" name="addBlockType" value="requirement"/>
                                             <Button type="submit" class="h-16 w-16 rounded-none border-t-0 border-b-0 border-l-0" variant="outline"><ListChecks/></Button>
                                         </form>
@@ -85,7 +86,7 @@
                                             <input type="hidden" name="addBlockStandardId" value={documentId} />
                                             <input type="hidden" name="addBlockNeighbourId" value={element.block_id} />
                                             <input type="hidden" name="addBlockPosition" value="before"/>
-                                            <input type="hidden" name="addBlockParentId" value={undefined}/>
+                                            <input type="hidden" name="addBlockParentId" value={parentId}/>
                                             <input type="hidden" name="addBlockType" value="prose"/>
                                             <Button type="submit" class="h-16 w-16 rounded-none border-t-0 border-b-0 border-l-0" variant="outline"><Pilcrow/></Button>
                                         </form>
@@ -93,7 +94,7 @@
                                             <input type="hidden" name="addBlockStandardId" value={documentId} />
                                             <input type="hidden" name="addBlockNeighbourId" value={element.block_id} />
                                             <input type="hidden" name="addBlockPosition" value="before"/>
-                                            <input type="hidden" name="addBlockParentId" value={undefined}/>
+                                            <input type="hidden" name="addBlockParentId" value={parentId}/>
                                             <input type="hidden" name="addBlockType" value="media"/>
                                             <Button type="submit" class="h-16 w-16 rounded-l-none border-0" variant="outline"><Image/></Button>
                                         </form>
@@ -136,7 +137,7 @@
                     </div>
                     <Accordion.Content class="px-4 pt-2 pb-2">
                         {#if element.blocks.length>0}
-                            <DocumentStructure structure={element.blocks} documentId={documentId}/>
+                            <DocumentStructure structure={element.blocks} documentId={documentId} parentId={element.block_id}/>
                         {:else}
                             <p>Empty Section</p>
                         {/if}   
