@@ -7,8 +7,9 @@
 	import {Button} from '$lib/components/ui/button/index';
 	import {Toaster} from '$lib/components/ui/sonner/index';
 	import {toast} from 'svelte-sonner';
-	import {Share, Search} from "lucide-svelte";
+	import {Share, Search, Sun, Moon} from "lucide-svelte";
 	import {page} from "$app/state"
+	import {toggleMode} from 'mode-watcher';
 	import AppSidebar from '$lib/components/app-sidebar.svelte';
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
@@ -58,7 +59,7 @@
 						</Breadcrumb.List>
 					</Breadcrumb.Root>
 				</div>
-				<div class="flex flex-row items-center gap-2">
+				<div class="flex flex-row items-center gap-1">
 					<Button class="flex lg:hidden" variant="outline" size="icon">
 						<Search />
 					</Button>
@@ -74,7 +75,7 @@
 					>
 						<Share />
 					</Button>
-					<Input placeholder="Search" class="hidden lg:block" />
+					<Input placeholder="Search" class="hidden lg:block bg-background" />
 					<Button class="hidden lg:flex"
 						onclick={()=>{
 							navigator.clipboard.writeText(page.url.toString())
@@ -87,10 +88,20 @@
 						<Share />
 						<span>Share</span>
 					</Button>
-					<Button variant="outline" href="https://app.nocodb.com/#/base/b492027e-d62e-442a-b061-5ac9f268346d">
-						<img src="/noco_icon.png" alt="nocodb logo" class="w-4 lg:w-8" />
+					<Button variant="outline" size="icon" href="https://app.nocodb.com/#/base/b492027e-d62e-442a-b061-5ac9f268346d">
+						<img src="/noco_icon.png" alt="nocodb logo" class="w-4 lg:w-8 mx-4 p-1" />
 						<span class="sr-only">View on NocoDB</span>
 					</Button>
+					<Button onclick={toggleMode} variant="outline" size="icon" class="p-3">
+						<Sun
+						  class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+						/>
+						<Moon
+						  class="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+						/>
+						<span class="sr-only">Toggle theme</span>
+					</Button>
+						
 				</div>
 			</div>
 		</header>

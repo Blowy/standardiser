@@ -20,7 +20,7 @@ export const load:PageServerLoad = async (request) => {
         }
     }
     return {document: document}  
-};
+}
 
 export const actions:Actions = {
     addSection: async (event)=>{
@@ -67,7 +67,7 @@ export const actions:Actions = {
                 message: 'No ID Provided'
             })
         }
-        blocument.serverAddSection(
+        await blocument.serverAddSection(
             title,
             parentId,
             position,
@@ -118,7 +118,7 @@ export const actions:Actions = {
                 message: 'No ID Provided'
             })
         }
-        blocument.serverAddBlock(
+        await blocument.serverAddBlock(
             type,
             parentId,
             position,
@@ -149,7 +149,7 @@ export const actions:Actions = {
         }
         const blocument = new Blocument(JSON.stringify(initialContent[0].content), parseInt(id))
         
-        blocument.serverEditSectionTitle(
+        await blocument.serverEditSectionTitle(
             sectionId,
             title
         )
@@ -179,7 +179,7 @@ export const actions:Actions = {
         }
         const blocument = new Blocument(JSON.stringify(initialContent[0].content), parseInt(id))
         
-        blocument.serverDeleteSection(
+        await blocument.serverDeleteSection(
             sectionId,
             parentId
         )
@@ -207,7 +207,7 @@ export const actions:Actions = {
         }
         const blocument = new Blocument(JSON.stringify(initialContent[0].content), parseInt(id))
         
-        blocument.serverDeleteBlock(
+        await blocument.serverDeleteBlock(
             blockId,
             parentId
         )
@@ -248,7 +248,7 @@ export const actions:Actions = {
                 message: 'No ID Provided'
             })
         }
-        blocument.serverMoveElement(
+        await blocument.serverMoveElement(
             elementId,
             moveType,
             parentId,
@@ -303,7 +303,7 @@ export const actions:Actions = {
                 message: 'No ID Provided'
             })
         }
-        blocument.serverMoveElementComplex(
+        await blocument.serverMoveElementComplex(
             elementId,
             parentId,
             futureParentId,
@@ -340,7 +340,7 @@ export const actions:Actions = {
                 message: 'No ID Provided'
             })
         }
-        blocument.serverLockElement(
+        await blocument.serverLockElement(
             lockElementId,
             lockElementUser
         )
@@ -374,7 +374,7 @@ export const actions:Actions = {
                 message: 'No ID Provided'
             })
         }
-        blocument.serverUnlockElement(
+        await blocument.serverUnlockElement(
             unlockElementId,
             unlockElementUser
         )

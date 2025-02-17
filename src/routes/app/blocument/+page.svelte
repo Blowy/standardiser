@@ -35,6 +35,9 @@
 
     let {data} = $props()
     let document = data?.document as DocumentContent
+
+    console.log("In +page.svelte. Document:")
+    console.log(document)
 </script>
 
 <div class="flex flex-row">
@@ -390,8 +393,7 @@
     </aside>
 </div>
 
-<!--TODO: Locking of Document Structure
-    TODO: Updating clients when there is a change
+<!--TODO: Updating clients when there is a change
     TODO: Block Components for the different types of blocks
     TODO: Refactor of all forms into hovering "form buttons"
     TODO: Hovering Add Between Buttons
