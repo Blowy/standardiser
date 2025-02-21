@@ -10,8 +10,9 @@
     import {Separator} from "$lib/components/ui/separator/index"
     import {Input} from "$lib/components/ui/input/index"
     import {Lock, LockOpen, LoaderCircle, Edit, MoveUp, Trash, MoveDown, Pilcrow, CirclePlus, ListStart, Image, ListChecks, Group, Save, CircleArrowLeft} from "lucide-svelte"
-    import type {Element} from "./document-class.svelte"
+    import type {Element} from "./document-class"
 	import { enhance } from "$app/forms";
+    import Requirement from "./requirement.svelte"
     
     type StructureMapObject = {
         addAboveOpen: boolean,
@@ -132,20 +133,12 @@
                         <div class="absolute top-3 right-14 transition-opacity duration-300 opacity-0 group-hover/edit-bar:opacity-100">
                             <div class="flex flex-row ">
                                 
-                                <!-- <form method="post" action="blocument?/moveElement" use:enhance>
+                                <form method="post" action="blocument?/moveElement" use:enhance>
                                     <input type="hidden" name="moveElementStandardId" value={documentId}/>
                                     <input type="hidden" name="moveElementId" value={element.block_id}/>
                                     <input type="hidden" name="moveElementParentId" value={parentId}/>
                                     <input type="hidden" name="moveElementType" value="up"/>
                                     <Button type="submit" variant="outline" size="icon" class="rounded-r-none border-r-0" disabled={i === 0}>
-                                        <MoveUp/>
-                                    </Button>
-                                </form> -->
-                                <form method="post" action="blocument?/moveElementInto" use:enhance>
-                                    <input type="hidden" name="moveElementIntoStandardId" value={documentId}/>
-                                    <input type="hidden" name="moveElementIntoId" value={element.block_id}/>
-                                    <input type="hidden" name="moveElementIntoType" value="up"/>
-                                    <Button type="submit" variant="outline" size="icon" class="rounded-r-none border-r-0">
                                         <MoveUp/>
                                     </Button>
                                 </form>
@@ -162,20 +155,12 @@
                                     </Button>
                                 </form>
                                 
-                                <!-- <form method="post" action="blocument?/moveElement" use:enhance>
+                                <form method="post" action="blocument?/moveElement" use:enhance>
                                     <input type="hidden" name="moveElementStandardId" value={documentId}/>
                                     <input type="hidden" name="moveElementId" value={element.block_id}/>
                                     <input type="hidden" name="moveElementParentId" value={parentId}/>
                                     <input type="hidden" name="moveElementType" value="down"/>
                                     <Button type="submit" variant="outline" size="icon" class="rounded-l-none border" disabled={i === structure.length-1}>
-                                        <MoveDown/>
-                                    </Button>
-                                </form> -->
-                                <form method="post" action="blocument?/moveElementInto" use:enhance>
-                                    <input type="hidden" name="moveElementIntoStandardId" value={documentId}/>
-                                    <input type="hidden" name="moveElementIntoId" value={element.block_id}/>
-                                    <input type="hidden" name="moveElementIntoType" value="down"/>
-                                    <Button type="submit" variant="outline" size="icon" class="rounded-l-none border">
                                         <MoveDown/>
                                     </Button>
                                 </form>
@@ -196,7 +181,7 @@
                         {/if}
                         <Accordion.Trigger data- class="p-4 bg-muted border-b ">
                             {#if structureMap && structureMap[i].editTitleInput == false}
-                                <p class="text-lg">{element.title} {element.block_id}</p>
+                                <p class="text-lg">{element.title}</p>
                             {:else if structureMap && structureMap[i].editTitleInput == true}
                                 <p class="mb-6"> </p>
                             {:else}
@@ -260,11 +245,12 @@
                         <Card.Header>
                             <div class="absolute top-8 right-8 transition-opacity duration-300 opacity-0 group-hover/edit-bar-block:opacity-100">
                                 <div class="flex flex-row ">
-                                    <form method="post" action="blocument?/moveElementInto" use:enhance>
-                                        <input type="hidden" name="moveElementIntoStandardId" value={documentId}/>
-                                        <input type="hidden" name="moveElementIntoId" value={element.block_id}/>
-                                        <input type="hidden" name="moveElementIntoType" value="up"/>
-                                        <Button type="submit" variant="outline" size="icon" class="rounded-r-none border-r-0" disabled={element.block_id === 1}>
+                                    <form method="post" action="blocument?/moveElement" use:enhance>
+                                        <input type="hidden" name="moveElementStandardId" value={documentId}/>
+                                        <input type="hidden" name="moveElementId" value={element.block_id}/>
+                                        <input type="hidden" name="moveElementParentId" value={parentId}/>
+                                        <input type="hidden" name="moveElementType" value="up"/>
+                                        <Button type="submit" variant="outline" size="icon" class="rounded-r-none border-r-0" disabled={i === 0}>
                                             <MoveUp/>
                                         </Button>
                                     </form>
@@ -280,11 +266,12 @@
                                             <Trash/>
                                         </Button>
                                     </div>
-                                    <form method="post" action="blocument?/moveElementInto" use:enhance>
-                                        <input type="hidden" name="moveElementIntoStandardId" value={documentId}/>
-                                        <input type="hidden" name="moveElementIntoId" value={element.block_id}/>
-                                        <input type="hidden" name="moveElementIntoType" value="down"/>
-                                        <Button type="submit" variant="outline" size="icon" class="rounded-l-none border">
+                                    <form method="post" action="blocument?/moveElement" use:enhance>
+                                        <input type="hidden" name="moveElementStandardId" value={documentId}/>
+                                        <input type="hidden" name="moveElementId" value={element.block_id}/>
+                                        <input type="hidden" name="moveElementParentId" value={parentId}/>
+                                        <input type="hidden" name="moveElementType" value="down"/>
+                                        <Button type="submit" variant="outline" size="icon" class="rounded-l-none border" disabled={i === structure.length-1}>
                                             <MoveDown/>
                                         </Button>
                                     </form>

@@ -2,10 +2,9 @@ import type { PageServerLoad, Actions } from "../$types";
 import {db} from "$lib/server/db/index"
 import * as tables from "$lib/server/db/schema"
 import {eq} from "drizzle-orm"
-import {Blocument} from "./document-class"
-import type {ElementPosition, BlockType, MoveType} from "./document-class"
+import {aegisDocument} from "./document-class.svelte"
+import type {ElementPosition, BlockType, MoveType} from "./document-class.svelte"
 import { error } from "@sveltejs/kit";
-
 
 export const load:PageServerLoad = async (request) => {
     const id = request.url.searchParams.get('id')
@@ -59,15 +58,9 @@ export const actions:Actions = {
         }
         console.table({title, parentId, neighbour, position})
         console.log(initialContent[0].content)
-        let blocument;
-        if(id){
-            blocument = new Blocument(JSON.stringify(initialContent[0].content), parseInt(id))
-        } else {
-            error(500, {
-                message: 'No ID Provided'
-            })
-        }
-        await blocument.serverAddSection(
+        aegisDocument.setDocumentContent(JSON.stringify(initialContent[0].content))
+        aegisDocument.setDocumentId(parseInt(id))
+        await aegisDocument.serverAddSection(
             title,
             parentId,
             position,
@@ -110,15 +103,9 @@ export const actions:Actions = {
         }
         console.table({type, parentId, position, neighbour})
         console.log(initialContent[0].content)
-        let blocument;
-        if(id){
-            blocument = new Blocument(JSON.stringify(initialContent[0].content), parseInt(id))
-        } else {
-            error(500, {
-                message: 'No ID Provided'
-            })
-        }
-        await blocument.serverAddBlock(
+        aegisDocument.setDocumentContent(JSON.stringify(initialContent[0].content))
+        aegisDocument.setDocumentId(parseInt(id))
+        await aegisDocument.serverAddBlock(
             type,
             parentId,
             position,
@@ -147,9 +134,9 @@ export const actions:Actions = {
         } else {
             sectionId = parseInt(data.get('editSectionId') as string)
         }
-        const blocument = new Blocument(JSON.stringify(initialContent[0].content), parseInt(id))
-        
-        await blocument.serverEditSectionTitle(
+        aegisDocument.setDocumentContent(JSON.stringify(initialContent[0].content))
+        aegisDocument.setDocumentId(parseInt(id))
+        await aegisDocument.serverEditSectionTitle(
             sectionId,
             title
         )
@@ -166,22 +153,15 @@ export const actions:Actions = {
         }
         console.log(initialContent[0].content)
         let sectionId;
-        let parentId
         if(data.get('deleteSectionId')==null || data.get('deleteSectionId')== undefined){
             error(500, {message: 'No Element ID Provided'})
         } else {
             sectionId = parseInt(data.get('deleteSectionId') as string)
         }
-        if(data.get('deleteSectionParentId')== null || data.get('deleteSectionParentId')== undefined){
-            parentId = undefined
-        } else {
-            parentId = parseInt(data.get('deleteSectionParentId') as string)
-        }
-        const blocument = new Blocument(JSON.stringify(initialContent[0].content), parseInt(id))
-        
-        await blocument.serverDeleteSection(
+        aegisDocument.setDocumentContent(JSON.stringify(initialContent[0].content))
+        aegisDocument.setDocumentId(parseInt(id))
+        await aegisDocument.serverDeleteSection(
             sectionId,
-            parentId
         )
     },
     deleteBlock: async (event)=>{
@@ -205,9 +185,9 @@ export const actions:Actions = {
         } else {
             parentId = parseInt(data.get('deleteBlockParentId') as string)
         }
-        const blocument = new Blocument(JSON.stringify(initialContent[0].content), parseInt(id))
-        
-        await blocument.serverDeleteBlock(
+        aegisDocument.setDocumentContent(JSON.stringify(initialContent[0].content))
+        aegisDocument.setDocumentId(parseInt(id))
+        await aegisDocument.serverDeleteBlock(
             blockId,
             parentId
         )
@@ -240,19 +220,42 @@ export const actions:Actions = {
             moveType = data.get('moveElementType') as MoveType
         }
         console.table({elementId, parentId})
-        let blocument;
-        if(id){
-            blocument = new Blocument(JSON.stringify(initialContent[0].content), parseInt(id))
-        } else {
-            error(500, {
-                message: 'No ID Provided'
-            })
-        }
-        await blocument.serverMoveElement(
+        aegisDocument.setDocumentContent(JSON.stringify(initialContent[0].content))
+        aegisDocument.setDocumentId(parseInt(id))
+        await aegisDocument.serverMoveElement(
             elementId,
             moveType,
             parentId,
         )
+    },
+    moveElementInto: async(event)=>{
+        console.log('Form Action Active - Move Element Into')
+        const data = await event.request.formData()
+        console.log(data)
+        const id = data.get("moveElementIntoStandardId") as string
+        const  initialContent = await db.select().from(tables.standards).where(eq(tables.standards.id, Number(id)))
+        if(initialContent[0].content === null){
+            initialContent[0].content = []
+        }
+        let elementId;
+        let moveType;
+        if(data.get('moveElementIntoId')==null || data.get('moveElementIntoId')== undefined || data.get('moveElementIntoId')==''){
+            error(500, {message: 'No Element ID Provided'})
+        } else {
+            elementId = parseInt(data.get('moveElementIntoId') as string)
+        }
+        if(data.get('moveElementIntoType')==null || data.get('moveElementIntoType')== undefined || data.get('moveElementIntoType')==''){
+            error(500, {message: 'No Move Type Provided'})
+        } else {
+            moveType = data.get('moveElementIntoType') as MoveType
+        }
+        aegisDocument.setDocumentContent(JSON.stringify(initialContent[0].content))
+        aegisDocument.setDocumentId(parseInt(id))
+        await aegisDocument.serverMoveElementInto(
+            elementId,
+            moveType
+        )
+        
     },
     moveElementComplex: async (event)=>{
         console.log('Form Action Active - Move Element Complex')
@@ -295,15 +298,9 @@ export const actions:Actions = {
         }
 
 
-        let blocument;
-        if(id){
-            blocument = new Blocument(JSON.stringify(initialContent[0].content), parseInt(id))
-        } else {
-            error(500, {
-                message: 'No ID Provided'
-            })
-        }
-        await blocument.serverMoveElementComplex(
+        aegisDocument.setDocumentContent(JSON.stringify(initialContent[0].content))
+        aegisDocument.setDocumentId(parseInt(id))
+        await aegisDocument.serverMoveElementComplex(
             elementId,
             parentId,
             futureParentId,
@@ -332,15 +329,9 @@ export const actions:Actions = {
         } else {
             lockElementUser = data.get('lockElementUser') as string
         }
-        let blocument;
-        if(id){
-            blocument = new Blocument(JSON.stringify(initialContent[0].content), parseInt(id))
-        } else {
-            error(500, {
-                message: 'No ID Provided'
-            })
-        }
-        await blocument.serverLockElement(
+        aegisDocument.setDocumentContent(JSON.stringify(initialContent[0].content))
+        aegisDocument.setDocumentId(parseInt(id))
+        await aegisDocument.serverLockElement(
             lockElementId,
             lockElementUser
         )
@@ -366,15 +357,9 @@ export const actions:Actions = {
         } else {
             unlockElementUser = data.get('unlockElementUser') as string
         }
-        let blocument;
-        if(id){
-            blocument = new Blocument(JSON.stringify(initialContent[0].content), parseInt(id))
-        } else {
-            error(500, {
-                message: 'No ID Provided'
-            })
-        }
-        await blocument.serverUnlockElement(
+        aegisDocument.setDocumentContent(JSON.stringify(initialContent[0].content))
+        aegisDocument.setDocumentId(parseInt(id))
+        await aegisDocument.serverUnlockElement(
             unlockElementId,
             unlockElementUser
         )

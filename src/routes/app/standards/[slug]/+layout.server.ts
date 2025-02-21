@@ -1,8 +1,23 @@
 import type { LayoutServerLoad } from './$types';
+import {error} from "@sveltejs/kit"
 
 export const load = (async (event) => {
-    const parent_data = await event.parent()
-    const page_standard = parent_data.standards.find((standard) => standard.id == parseInt(event.params.slug))
-    const standard_id = parseInt(event.params.slug)
-    return {page_standard, standard_id};
+    const standardId = parseInt(event.params.slug)
+    console.log("Standard ID:")
+    console.log(standardId)
+    if (isNaN(standardId))
+    {
+        error(404, "Invalid standard ID")
+    }
+    console.log("Event Parent:")
+    console.log(await event.parent())
+    const selectedStandard = (await event.parent()).standards.find((standard) => standard.id == standardId)
+    console.log("Selected Standard:")
+    console.log(selectedStandard)
+    if (!selectedStandard)
+    {
+        error(404, "Standard not found")
+    }
+    
+    return {selectedStandard, standardId};
 }) satisfies LayoutServerLoad;

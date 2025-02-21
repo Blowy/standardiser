@@ -8,9 +8,9 @@
     import {ListPlus, Trash, Move, MoveUp, MoveDown, Plus, Edit, Ellipsis, Pilcrow, ListChecks, Image, ListStart, ListEnd, CirclePlus, Save} from 'lucide-svelte'
     import {Separator} from '$lib/components/ui/separator/index';
 
-    import Requirement from './requirement.svelte';
-    import Prose from './prose.svelte';
-    import Media from './media.svelte';
+    import Requirement from '../standards/[slug]/requirement.svelte';
+    import Prose from '../standards/[slug]/prose.svelte';
+    import Media from '../standards/[slug]/media.svelte';
     let {structure=$bindable(), document=$bindable(), standard_id} = $props()
 
     $effect(()=>{
@@ -281,7 +281,7 @@
                         </Accordion.Trigger>
                         <Accordion.Content class="px-4 pb-0">
                             {#if block.blocks.length>0}
-                                <DocStructure structure={block.blocks} document={structure} standard_id={standard_id}/>
+                                <DocStructure structure={block.blocks} document={structure} standardId={standard_id}/>
                             {:else}
                                 <p class="font-semibold text-muted-foreground pt-4">This section is empty, how would you like to populate it?</p>
                                 <div class="flex flex-row gap-4 py-4 w-1/2">

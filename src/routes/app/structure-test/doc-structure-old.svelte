@@ -1,10 +1,10 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import {Button} from '$lib/components/ui/button/index';
-    import DocStructure from "./doc-structure-old.svelte";
-    import Requirement from './requirement.svelte';
-    import Media from './media.svelte';
-    import Prose from './prose.svelte';
+    import DocStructure from "../standards/[slug]/doc-structure-old.svelte";
+    import Requirement from '../standards/[slug]/requirement.svelte';
+    import Media from '../standards/[slug]/media.svelte';
+    import Prose from '../standards/[slug]/prose.svelte';
     import * as Accordion from "$lib/components/ui/accordion/index";
     import {ListEnd, Trash,MoveUp,MoveDown} from "lucide-svelte"
 

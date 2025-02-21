@@ -22,7 +22,7 @@ import {eq} from "drizzle-orm"
 import * as tables from "$lib/server/db/schema"
 
 
-export class Blocument{
+export class Aegis_Block_Document{
     constructor(documentString:string, document_id:number){
         this.document = JSON.parse(documentString)
         this.document_id = Number(document_id)
@@ -73,7 +73,7 @@ export class Blocument{
                     return element;
                 }
                 if ('blocks' in element) {
-                    const foundElement = Blocument.getElementById(element.blocks, id);
+                    const foundElement = Aegis_Block_Document.getElementById(element.blocks, id);
                     if (foundElement) {
                         return foundElement;
                     }
@@ -92,7 +92,7 @@ export class Blocument{
                 }
                 if ('blocks' in element){
                     parentSection = element.block_id
-                    const foundElement = Blocument.getParentSectionId(element.blocks, id)
+                    const foundElement = Aegis_Block_Document.getParentSectionId(element.blocks, id)
                     if(foundElement){
                         return parentSection
                     }
@@ -108,7 +108,7 @@ export class Blocument{
      * @returns {DocumentContent} - The original document strutcure with the Block IDs in ascending order
      */
     static resequenceBlockIds(document:DocumentContent, currentId:number):number{
-        //console.log("Blocument Function - Resequence Block IDs")
+        //console.log("Aegis_Block_Document Function - Resequence Block IDs")
         document.forEach(element => {
             if (element != null || element != undefined){
                 //console.log("Element is ok")
@@ -116,7 +116,7 @@ export class Blocument{
                 //console.log("initial reassignment")
                 currentId++
                 if ('blocks' in element && Array.isArray(element.blocks)){
-                    currentId = Blocument.resequenceBlockIds(element.blocks, currentId)
+                    currentId = Aegis_Block_Document.resequenceBlockIds(element.blocks, currentId)
                 }
             }
         })
@@ -131,7 +131,7 @@ export class Blocument{
      * @param {number} [blockId] - The optional ID of the block after or before which the section should be inserted.
      */
     async serverAddSection(title: string,parentId?: number,position: ElementPosition="end",blockId?: number){
-        console.log('Blocument Function - Server Add Section')
+        console.log('Aegis_Block_Document Function - Server Add Section')
         const newSection:Section = {
             title: title,
             block_id: this.getHighestBlockId()+1,
@@ -142,7 +142,7 @@ export class Blocument{
         console.table([{title: newSection.title, block_id: newSection.block_id, blocks: newSection.blocks}])
         if (parentId){
             console.log("Parent ID Provided")
-            const parentSection = Blocument.getElementById(this.document, parentId)
+            const parentSection = Aegis_Block_Document.getElementById(this.document, parentId)
             if (parentSection){
                 console.log("Parent element found")
                 if('blocks' in parentSection){
@@ -202,7 +202,7 @@ export class Blocument{
             }
         }
         
-        Blocument.resequenceBlockIds(this.document, 1)
+        Aegis_Block_Document.resequenceBlockIds(this.document, 1)
         console.log(JSON.stringify(this.document)) 
         await db.update(tables.standards).set({content: JSON.stringify(this.document)}).where(eq(tables.standards.id, this.document_id))
     }
@@ -213,7 +213,7 @@ export class Blocument{
      * @param {string} newTitle - The new title to apply to the section
      */
     async serverEditSectionTitle(id:number,newTitle:string){
-        const section = Blocument.getElementById(this.document, id)
+        const section = Aegis_Block_Document.getElementById(this.document, id)
         if (section && 'title' in section){
             section.title = newTitle
             await db.update(tables.standards).set({content: JSON.stringify(this.document)}).where(eq(tables.standards.id, this.document_id))
@@ -225,9 +225,9 @@ export class Blocument{
      * @param {number} id - The Block ID of the section to delete.
      */
     async serverDeleteSection(id:number, parentId?:number){
-        const section = Blocument.getElementById(this.document, id)
+        const section = Aegis_Block_Document.getElementById(this.document, id)
         if (parentId){
-            const parentSection = Blocument.getElementById(this.document, parentId)
+            const parentSection = Aegis_Block_Document.getElementById(this.document, parentId)
             if(parentSection && 'blocks' in parentSection){
                 const index = parentSection.blocks.findIndex(section => section && section.block_id === id)
                 if (index > -1){
@@ -236,7 +236,7 @@ export class Blocument{
                             console.error("Section contains blocks. Please remove blocks before deleting the section.")
                         } else{
                             parentSection.blocks.splice(index, 1)
-                            Blocument.resequenceBlockIds(this.document, 1)
+                            Aegis_Block_Document.resequenceBlockIds(this.document, 1)
                             await db.update(tables.standards).set({content: JSON.stringify(this.document)}).where(eq(tables.standards.id, this.document_id))
                         }
                     }
@@ -250,7 +250,7 @@ export class Blocument{
                 const index = this.document.findIndex(element => element && element.block_id === id) //Woah woah woah - how can this possibly work?
                 if (index > -1){
                     this.document.splice(index, 1)
-                    Blocument.resequenceBlockIds(this.document, 1)
+                    Aegis_Block_Document.resequenceBlockIds(this.document, 1)
                     await db.update(tables.standards).set({content: JSON.stringify(this.document)}).where(eq(tables.standards.id, this.document_id))
                 }       
             }
@@ -269,7 +269,7 @@ export class Blocument{
      */
 
     async serverAddBlock(blockType: BlockType,parentId?: number,position: ElementPosition="end",blockId?: number){
-        console.log('Blocument Function - Server Add Block')
+        console.log('Aegis_Block_Document Function - Server Add Block')
         const newBlock:Block = {
             type: blockType,
             block_id: this.getHighestBlockId()+1,
@@ -284,7 +284,7 @@ export class Blocument{
                 newBlock.db_id = blockDbEntry[0].id
                 if (parentId){
                     console.log("Parent ID Provided")
-                    const parentSection = Blocument.getElementById(this.document, parentId)
+                    const parentSection = Aegis_Block_Document.getElementById(this.document, parentId)
                     if (parentSection){
                         console.log("Parent element found")
                         if('blocks' in parentSection){
@@ -346,7 +346,7 @@ export class Blocument{
                         }
                     }
                 }
-                Blocument.resequenceBlockIds(this.document, 1)
+                Aegis_Block_Document.resequenceBlockIds(this.document, 1)
                 console.log(JSON.stringify(this.document)) 
                 await tx.update(tables.standards).set({content: JSON.stringify(this.document)}).where(eq(tables.standards.id, this.document_id))
             })
@@ -358,8 +358,8 @@ export class Blocument{
     async serverDeleteBlock(id:number, parentId?:number){
         try{
             await db.transaction(async (tx)=>{
-                console.log('Blocument Function - Server Delete Block')
-                const block = Blocument.getElementById(this.document, id)
+                console.log('Aegis_Block_Document Function - Server Delete Block')
+                const block = Aegis_Block_Document.getElementById(this.document, id)
                 if(block){
                     if(block.locked != false){
                         throw new Error("Block is locked")
@@ -368,14 +368,14 @@ export class Blocument{
                 console.log(block)
                 if (parentId){
                     console.log("Parent ID Provided")
-                    const parentSection = Blocument.getElementById(this.document, parentId)
+                    const parentSection = Aegis_Block_Document.getElementById(this.document, parentId)
                     if(parentSection && 'blocks' in parentSection){
                         console.log("Parent Section Found and is indeed a section")
                         const index = parentSection.blocks.findIndex(section => section && section.block_id === id)
                         if (index > -1){
                             if(parentSection.blocks[index]){
                                 parentSection.blocks.splice(index, 1)
-                                Blocument.resequenceBlockIds(this.document, 1)
+                                Aegis_Block_Document.resequenceBlockIds(this.document, 1)
                                 await tx.update(tables.standards).set({content: JSON.stringify(this.document)}).where(eq(tables.standards.id, this.document_id))
                             }
                         }
@@ -388,7 +388,7 @@ export class Blocument{
                     const index = this.document.findIndex(element => element && element.block_id === id)
                     if (index > -1){
                         this.document.splice(index, 1)
-                        Blocument.resequenceBlockIds(this.document, 1)
+                        Aegis_Block_Document.resequenceBlockIds(this.document, 1)
                         await tx.update(tables.standards).set({content: JSON.stringify(this.document)}).where(eq(tables.standards.id, this.document_id))
                     }       
                 } else{
@@ -415,11 +415,11 @@ export class Blocument{
     }
 
     async serverMoveElement(id:number, moveType:MoveType, parentId?:number){
-        console.log('Blocument Function - Server Move Element')
+        console.log('Aegis_Block_Document Function - Server Move Element')
         console.table([{id, parentId, moveType}])   
         if(parentId){
             console.log('Parent ID passed')
-            const parentSection = Blocument.getElementById(this.document, parentId)
+            const parentSection = Aegis_Block_Document.getElementById(this.document, parentId)
             if(parentSection){
                 console.log('Parent Section found')
                 if('blocks' in parentSection){
@@ -481,7 +481,7 @@ export class Blocument{
                 console.error("Element not found in document")
             }
         }
-        Blocument.resequenceBlockIds(this.document, 1)
+        Aegis_Block_Document.resequenceBlockIds(this.document, 1)
         await db.update(tables.standards).set({content: JSON.stringify(this.document)}).where(eq(tables.standards.id, this.document_id))
     }
 
@@ -490,13 +490,13 @@ export class Blocument{
         console.table([{id, parentId, futureSectionId, neighbourElementId, position}])
         try{
             if(parentId){
-                const parentSection = Blocument.getElementById(this.document, parentId)
+                const parentSection = Aegis_Block_Document.getElementById(this.document, parentId)
                 if(parentSection && 'blocks' in parentSection && parentSection.blocks.length>0){
                     const index = parentSection.blocks.findIndex(element => element && element.block_id === id)
                     if(index > -1){
                         const element = parentSection.blocks[index]
                         if(futureSectionId){
-                            const futureSection = Blocument.getElementById(this.document, futureSectionId)
+                            const futureSection = Aegis_Block_Document.getElementById(this.document, futureSectionId)
                             if(futureSection && 'blocks' in futureSection){
                                 if(neighbourElementId){
                                     const neighbourIndex = futureSection.blocks.findIndex(element => element && element.block_id === neighbourElementId)
@@ -567,7 +567,7 @@ export class Blocument{
                 if(index > -1){
                     const element = this.document[index]
                     if(futureSectionId){
-                        const futureSection = Blocument.getElementById(this.document, futureSectionId)
+                        const futureSection = Aegis_Block_Document.getElementById(this.document, futureSectionId)
                         if(futureSection && 'blocks' in futureSection){
                             if(neighbourElementId){
                                 const neighbourIndex = futureSection.blocks.findIndex(element => element && element.block_id === neighbourElementId)
@@ -636,8 +636,8 @@ export class Blocument{
     }
 
     async serverLockElement(id:number, userId:string){
-        console.log('Blocument Function - Server Lock Element')
-        const element = Blocument.getElementById(this.document, id)
+        console.log('Aegis_Block_Document Function - Server Lock Element')
+        const element = Aegis_Block_Document.getElementById(this.document, id)
         if (element){
             if(element.locked == false){
                 element.locked ={state: true, user: userId}
@@ -649,7 +649,7 @@ export class Blocument{
     }
     async serverUnlockElement(id:number, userId:string){
         console.log('Server Unlock Element')
-        const element = Blocument.getElementById(this.document, id)
+        const element = Aegis_Block_Document.getElementById(this.document, id)
         if(element){
             if(element.locked == false){
                 console.error("Element is not locked")

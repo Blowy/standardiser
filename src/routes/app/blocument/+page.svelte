@@ -5,9 +5,11 @@
     import {Separator} from '$lib/components/ui/separator/index'
     import {Checkbox} from '$lib/components/ui/checkbox/index'
     import CustomSelect from '$lib/components/custom-select.svelte';
+    import {ScrollArea} from '$lib/components/ui/scroll-area/index';
     import DocumentStructure from './document-structure.svelte';
     import {Blocks, Group, Trash, Edit, Move, ArrowUpDown, Lock, LockOpen} from 'lucide-svelte'
     import * as RadioGroup from '$lib/components/ui/radio-group/index';
+    import * as Tabs from '$lib/components/ui/tabs/index';
     import {page} from '$app/state';
     import {enhance} from '$app/forms'
     
@@ -31,27 +33,26 @@
         {value:'prose', label:'Prose'},
         {value:'media', label:'Media'},
     ]
-    import type {DocumentContent} from './document-class'
 
     let {data} = $props()
-    let document = data?.document as DocumentContent
+    let document = data?.document
 
     console.log("In +page.svelte. Document:")
     console.log(document)
+    let sidebarOpen = $state(false)
 </script>
 
-<div class="flex flex-row">
-    <main class="w-3/4 p-4">
+<div class="flex flex-col">
+    <div class="w-full h-16 border-b">
+        <h1>Title Test</h1> 
+    </div>
+    <ScrollArea class="w-full h-[calc(100vh-8rem)]">
         {#if document}
-            {#if document.length == 0}
-                <p class="text-muted-foreground">Empty Document</p>
-            {/if}
             <DocumentStructure structure={data.document} documentId={page.url.searchParams.get('id')} />
         {/if}
-    </main>
-    <aside class="flex flex-col bg-sidebar border-l w-1/4">
+    </ScrollArea>
+    <!-- <aside class="flex flex-col bg-sidebar border-l w-1/4">
 
-        <!--Lock a Block-->
         <section>
             <div class=" p-4 flex flex-row gap-2 text-muted-foreground items-center bg-muted">
                 <Lock class="size-4"/>
@@ -80,7 +81,6 @@
             </form>
         </section>
         <Separator/>
-        <!--Unlock a Block-->
         <section>
             <div class=" p-4 flex flex-row gap-2 text-muted-foreground items-center bg-muted">
                 <LockOpen class="size-4"/>
@@ -109,7 +109,6 @@
             </form>
         </section>
         <Separator/>
-        <!--Add Section-->
         <section>
             <div class=" p-4 flex flex-row gap-2 text-muted-foreground items-center bg-muted">
                 <Group class="size-4"/>
@@ -168,7 +167,6 @@
         </section>
         <Separator/>
 
-        <!--Edit Section Title-->
         <section>
             <div class=" p-4 flex flex-row gap-2 text-muted-foreground items-center bg-muted">
                 <Edit class="size-4"/>
@@ -189,8 +187,6 @@
             </form>
         </section>
         <Separator/>
-
-        <!--Add Block-->
         <section>
             <div class=" p-4 flex flex-row gap-2 text-muted-foreground items-center bg-muted">
                 <Blocks class="size-4"/>
@@ -206,7 +202,6 @@
                             <option value={value.value}>{value.label}</option>
                         {/each}
                     </select>
-                    <!-- <CustomSelect select_type="single" name="addBlockType" select_value={addBlockTypeString} disabled={false} placeholder="Select Block Type" values={addBlockTypeValues}/> -->
                 </div>
                 <div class="flex items-center gap-4">
                     <Checkbox bind:checked={addBlockNestInSection} class="bg-background"/>
@@ -252,7 +247,6 @@
         </section>
         <Separator/>
 
-        <!--Move Element - Simple -->
         <section>
             <div class=" p-4 flex flex-row gap-2 text-muted-foreground items-center bg-muted">
                 <ArrowUpDown class="size-4"/>
@@ -269,7 +263,7 @@
                     <Label for="moveElementId">Parent Element</Label>
                     <Input type="text" name="moveElementParentId" id="moveElementParentId" placeholder="Parent Element Id" class=" bg-background"/>
                 </div>
-                <RadioGroup.Root name="moveElementType" bind:value={moveElementType} class="mt-2 ml-1">
+                <RadioGroup.Root name="moveElementType" bind:value={moveElementType} class="mt-2 ml-1">s
                     <div class="flex flex-row gap-4">
                         <RadioGroup.Item value="up" id="moveElementUp" class="bg-background"/>
                         <Label for="moveElementUp">Move Element Up</Label>
@@ -284,7 +278,6 @@
         </section>
         <Separator/>
 
-        <!--Move Element - Complex -->
         <section>
             <div class=" p-4 flex flex-row gap-2 text-muted-foreground items-center bg-muted">
                 <Move class="size-4"/>
@@ -347,7 +340,6 @@
         </section>
         <Separator/>
 
-        <!--Delete Section-->
         <section>
             <div class=" p-4 flex flex-row gap-2 text-muted-foreground items-center bg-muted">
                 <Trash class="size-4"/>
@@ -369,7 +361,6 @@
         </section>
         <Separator/>
 
-        <!--Delete Block-->
         <section>
             <div class=" p-4 flex flex-row gap-2 text-muted-foreground items-center bg-muted">
                 <Trash class="size-4"/>
@@ -390,15 +381,14 @@
             </form>
         </section>
         <Separator/>
-    </aside>
+    </aside> -->
 </div>
 
 <!--TODO: Updating clients when there is a change
     TODO: Block Components for the different types of blocks
-    TODO: Refactor of all forms into hovering "form buttons"
-    TODO: Hovering Add Between Buttons
     TODO: Bring in Sidebar for editing blocks
-    TODO: Refactor all class functions as try catch, with sufficient error messages, transaction style rollback if necessary
     TODO: Add return messages etc. to the class functions so that I can communicate failure to the end user
     TODO: Sonner for successful adds/deletes/edits and for any failures
+    TODO: Update move function to allow movement in and out of sections
+    TODO: Put in scroll areas
 -->
