@@ -41,7 +41,6 @@
 
 
 	let { user, standards } = $props();
-	console.log(standards);
 
 	let dbHeartbeat = $state("Checking")
 	async function getHeartbeat(){

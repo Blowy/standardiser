@@ -215,7 +215,9 @@ const replaceAll = (
 		resultsCopy = rebaseNextResultResponse[1];
 	}
 
-	dispatch(tr);
+	if(dispatch !== undefined){
+		dispatch(tr);
+	}
 };
 
 export const searchAndReplacePluginKey = new PluginKey('searchAndReplacePlugin');

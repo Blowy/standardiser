@@ -11,9 +11,7 @@
 	import {page} from "$app/state"
 	import {toggleMode} from 'mode-watcher';
 	import AppSidebar from '$lib/components/app-sidebar.svelte';
-
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
-
 </script>
 <Toaster></Toaster>
 <Sidebar.Provider>
@@ -89,7 +87,7 @@
 						<span>Share</span>
 					</Button>
 					<Button variant="outline" size="icon" href="https://app.nocodb.com/#/base/b492027e-d62e-442a-b061-5ac9f268346d">
-						<img src="/noco_icon.png" alt="nocodb logo" class="w-4 lg:w-8 mx-4 p-1" />
+						<img src="/noco_icon.png" alt="nocodb logo" class="lg:w-8 mx-4 p-1" />
 						<span class="sr-only">View on NocoDB</span>
 					</Button>
 					<Button onclick={toggleMode} variant="outline" size="icon" class="p-3">

@@ -1,6 +1,6 @@
 <script lang="ts">
     let {structure, documentId, parentId=undefined} = $props()
-    import DocumentStructure from "./document-structure.svelte"
+    import DocumentStructure from "$lib/aegis-block-document/document-structure.svelte"
     import * as Accordion from "$lib/components/ui/accordion/index"
     import * as Card from "$lib/components/ui/card/index";
     import * as Tooltip from "$lib/components/ui/tooltip/index";
@@ -10,9 +10,13 @@
     import {Separator} from "$lib/components/ui/separator/index"
     import {Input} from "$lib/components/ui/input/index"
     import {Lock, LockOpen, LoaderCircle, Edit, MoveUp, Trash, MoveDown, Pilcrow, CirclePlus, ListStart, Image, ListChecks, Group, Save, CircleArrowLeft} from "lucide-svelte"
-    import type {Element} from "./document-class"
+    import type {Element} from "$lib/aegis-block-document/document-class.svelte"
 	import { enhance } from "$app/forms";
-    import Requirement from "./requirement.svelte"
+    import {Traverse} from "neotraverse/modern"
+    import {sidebarState} from "$lib/aegis-block-document/sidebar-state.svelte"
+    import Requirement from "$lib/aegis-block-document/requirement.svelte"
+    import Prose from "$lib/aegis-block-document/prose.svelte"
+    import Media from "$lib/aegis-block-document/media.svelte"
     
     type StructureMapObject = {
         addAboveOpen: boolean,
@@ -21,6 +25,7 @@
         addSectionToEmptySection: boolean
     }
     
+
     let structureMap = $state<StructureMapObject[]>()
     let accordionOpenArray = $state<string[]>([])
     let addToEndInfo = $state({
@@ -31,6 +36,7 @@
         addSection: false
     })
     $effect.pre(()=>{
+        
         structureMap = structure.map(() => {
             return {
                 addAboveOpen: false,
@@ -44,6 +50,7 @@
                 return `section-${element.block_id}`
             }
         })
+        
     })
 
     let deleteBlockDialogInfo = $state({
@@ -57,8 +64,8 @@
 
 <div class="flex flex-col">
     {#each structure as element, i}
-        <div class="w-full flex flex-row justify-center px-4">
-            <div class="relative group/add-above w-full mt-2">
+        <div class="w-full flex flex-row justify-center mt-2">
+            <div class="relative group/add-above w-full">
                 <div class={structureMap && structureMap[i].addAboveOpen == true ? "opacity-100 absolute items-center w-full": "opacity-0 group-hover/add-above:opacity-100 absolute items-center w-full transition-opacity duration-300"}>
                    {#if structureMap}
                         <Popover.Root bind:open={structureMap[i].addAboveOpen}>
@@ -82,7 +89,7 @@
                                         {/if}
                                     </Button>
                                     {#if structureMap && structureMap[i].newSectionInput == true}
-                                        <form method="post" action="blocument?/addSection" class="flex flex-row items-center p-2 gap-2" use:enhance>
+                                        <form method="post" action="standards?/addSection" class="flex flex-row items-center p-2 gap-2" use:enhance>
                                             <input type='hidden' name="addSectionStandardId" value={documentId} />
                                             <input type='hidden' name="addSectionNeighbourId" value={element.block_id} />
                                             <input type='hidden' name='addSectionPosition' value="before"/>
@@ -91,7 +98,7 @@
                                             <Button variant="default" type="submit"><ListStart/></Button>
                                         </form>                      
                                     {:else}
-                                        <form method="post" action="blocument?/addBlock" use:enhance>
+                                        <form method="post" action="standards?/addBlock" use:enhance>
                                             <input type="hidden" name="addBlockStandardId" value={documentId} />
                                             <input type="hidden" name="addBlockNeighbourId" value={element.block_id} />
                                             <input type="hidden" name="addBlockPosition" value="before"/>
@@ -99,7 +106,7 @@
                                             <input type="hidden" name="addBlockType" value="requirement"/>
                                             <Button type="submit" class="h-16 w-16 rounded-none border-t-0 border-b-0 border-l-0" variant="outline"><ListChecks/></Button>
                                         </form>
-                                        <form method="post" action="blocument?/addBlock" use:enhance>
+                                        <form method="post" action="standards?/addBlock" use:enhance>
                                             <input type="hidden" name="addBlockStandardId" value={documentId} />
                                             <input type="hidden" name="addBlockNeighbourId" value={element.block_id} />
                                             <input type="hidden" name="addBlockPosition" value="before"/>
@@ -107,7 +114,7 @@
                                             <input type="hidden" name="addBlockType" value="prose"/>
                                             <Button type="submit" class="h-16 w-16 rounded-none border-t-0 border-b-0 border-l-0" variant="outline"><Pilcrow/></Button>
                                         </form>
-                                        <form method="post" action="blocument?/addBlock" use:enhance>
+                                        <form method="post" action="standards?/addBlock" use:enhance>
                                             <input type="hidden" name="addBlockStandardId" value={documentId} />
                                             <input type="hidden" name="addBlockNeighbourId" value={element.block_id} />
                                             <input type="hidden" name="addBlockPosition" value="before"/>
@@ -126,166 +133,170 @@
             </div>
         </div>
         {#if Object.hasOwn(element, 'title') && Object.hasOwn(element, 'blocks')}
-        <div class="px-4">
-            <Accordion.Root type="multiple" bind:value={accordionOpenArray}>
-                <Accordion.Item value={`section-${element.block_id}`} class="border-1 border shadow">
-                    <div class="group/edit-bar relative w-full">
-                        <div class="absolute top-3 right-14 transition-opacity duration-300 opacity-0 group-hover/edit-bar:opacity-100">
+            <Card.Root>
+                <div class="group/edit-bar relative w-full">
+                    <div class="absolute top-3 right-3 transition-opacity duration-300 opacity-0 group-hover/edit-bar:opacity-100">
+                        <div class="flex flex-row ">
+                            
+                            <form method="post" action="standards?/moveElementInto" use:enhance>
+                                <input type="hidden" name="moveElementIntoStandardId" value={documentId}/>
+                                <input type="hidden" name="moveElementIntoId" value={element.block_id}/>
+                                <input type="hidden" name="moveElementIntoType" value="up"/>
+                                <Button type="submit" variant="outline" size="icon" class="rounded-r-none border-r-0" disabled={element.block_id === 1}>
+                                    <MoveUp/>
+                                </Button>
+                            </form>
+                            
+                            <Button variant="outline" size="icon" class="border-r-0 rounded-none" onclick={()=>{if(structureMap){structureMap[i].editTitleInput = !structureMap[i].editTitleInput}}}>
+                                <Edit/>
+                            </Button>
+                            <form method="post" action="standards?/deleteSection" use:enhance>
+                                <input type="hidden" name="deleteSectionStandardId" value={documentId}/>
+                                <input type="hidden" name="deleteSectionId" value={element.block_id}/>
+                                <input type="hidden" name="deleteSectionParentId" value={parentId}/>
+                                <Button type="submit" variant="outline" size="icon" class="border-r-0 rounded-none" disabled={element.blocks.length > 0}>
+                                    <Trash/>
+                                </Button>
+                            </form>
+
+                            <form method="post" action="standards?/moveElementInto" use:enhance>
+                                <input type="hidden" name="moveElementIntoStandardId" value={documentId}/>
+                                <input type="hidden" name="moveElementIntoId" value={element.block_id}/>
+                                <input type="hidden" name="moveElementIntoType" value="down"/>
+                                <Button type="submit" variant="outline" size="icon" class="rounded-l-none border">
+                                    <MoveDown/>
+                                </Button>
+                            </form>
+
+                        </div>
+                    </div>
+                    {#if structureMap && structureMap[i].editTitleInput == true}
+                        <div class="absolute top-3 left-3">
+                            <form method="post" action="standards?/editSectionTitle" class="flex flex-row items-center gap-2" use:enhance> 
+                                <input type="hidden" name="editSectionStandardId" value={documentId}/>
+                                <input type="hidden" name="editSectionId" value={element.block_id}/>
+                                <Input type="text" name="editSectionTitle" value={element.title} class="w-48 bg-background"/>
+                                <Button type="submit" size="icon">
+                                    <Save/>
+                                </Button>
+                            </form>
+                        </div>
+                    {/if}
+                    <Card.Header data- class="p-4 border-b bg-muted/75 rounded-t-xl">
+                        {#if structureMap && structureMap[i].editTitleInput == false}
+                            <p class="font-semibold">{element.title}</p>
+                        {:else if structureMap && structureMap[i].editTitleInput == true}
+                            <p class="mb-6"> </p>
+                        {:else}
+                            <LoaderCircle class="size-3 animate-spin"/>
+                        {/if}
+                    </Card.Header>
+                </div>
+                <Card.Content class="bg-muted/25 py-2">
+                    {#if element.blocks.length>0}
+                        <DocumentStructure structure={element.blocks} documentId={documentId} parentId={element.block_id}/>
+                    {:else}
+                        <div class="flex flex-row items-center ">
+                            {#if structureMap && structureMap[i].addSectionToEmptySection == true}
+                                <Button variant="outline" size="icon" onclick={()=>{if(structureMap){structureMap[i].addSectionToEmptySection = !structureMap[i].addSectionToEmptySection}}}><CircleArrowLeft/></Button>
+                                <form method="post" action="standards?/addSection" use:enhance class="flex flex-row gap-2">
+                                    <input type='hidden' name="addSectionStandardId" value={documentId} />
+                                    <input type='hidden' name="addSectionNeighbourId" value={undefined} />
+                                    <input type='hidden' name='addSectionPosition' value="start"/>
+                                    <input type='hidden' name='addSectionParentId' value={element.block_id}/>
+                                    <Input class="w-48" placeholder="New Section" name="addSectionTitle"/>
+                                    <Button type="submit"><ListStart/></Button>
+                                </form>
+                            {:else}
+                                <Button onclick={()=>{if(structureMap){structureMap[i].addSectionToEmptySection = !structureMap[i].addSectionToEmptySection}}}><Group/>Add Section</Button>
+                            {/if}
+                            <span class="text-muted-foreground font-semibold"> - or - </span> 
+                            <form method="post" action="standards?/addBlock" use:enhance>
+                                <input type="hidden" name="addBlockStandardId" value={documentId} />
+                                <input type="hidden" name="addBlockNeighbourId" value={undefined} />
+                                <input type="hidden" name="addBlockPosition" value="start"/>
+                                <input type="hidden" name="addBlockParentId" value={element.block_id}/>
+                                <input type="hidden" name="addBlockType" value="requirement"/>
+                                <Button type="submit" variant="secondary"><ListChecks/> Add Requirement</Button>
+                            </form>
+                            <form method="post" action="standards?/addBlock" use:enhance>
+                                <input type="hidden" name="addBlockStandardId" value={documentId} />
+                                <input type="hidden" name="addBlockNeighbourId" value={undefined} />
+                                <input type="hidden" name="addBlockPosition" value="start"/>
+                                <input type="hidden" name="addBlockParentId" value={element.block_id}/>
+                                <input type="hidden" name="addBlockType" value="prose"/>
+                                <Button type="submit" variant="secondary"><Pilcrow/> Add Prose</Button>
+                            </form>
+                            <form method="post" action="standards?/addBlock" use:enhance>
+                                <input type="hidden" name="addBlockStandardId" value={documentId} />
+                                <input type="hidden" name="addBlockNeighbourId" value={undefined} />
+                                <input type="hidden" name="addBlockPosition" value="start"/>
+                                <input type="hidden" name="addBlockParentId" value={element.block_id}/>
+                                <input type="hidden" name="addBlockType" value="media"/>
+                                <Button type="submit" variant="secondary"><Image/> Add Media</Button>
+                            </form>
+                        </div>
+                    {/if}   
+                </Card.Content>
+            </Card.Root>
+        {:else}
+            <Card.Root>
+                <div class="group/edit-bar-block relative w-full">
+                    <Card.Header class="border-b p-4 bg-muted rounded-t-xl">
+                        <div class="absolute top-3 right-3 transition-opacity duration-300 opacity-0 group-hover/edit-bar-block:opacity-100">
                             <div class="flex flex-row ">
-                                
-                                <form method="post" action="blocument?/moveElement" use:enhance>
-                                    <input type="hidden" name="moveElementStandardId" value={documentId}/>
-                                    <input type="hidden" name="moveElementId" value={element.block_id}/>
-                                    <input type="hidden" name="moveElementParentId" value={parentId}/>
-                                    <input type="hidden" name="moveElementType" value="up"/>
-                                    <Button type="submit" variant="outline" size="icon" class="rounded-r-none border-r-0" disabled={i === 0}>
+                                <form method="post" action="standards?/moveElementInto" use:enhance>
+                                    <input type="hidden" name="moveElementIntoStandardId" value={documentId}/>
+                                    <input type="hidden" name="moveElementIntoId" value={element.block_id}/>
+                                    <input type="hidden" name="moveElementIntoType" value="up"/>
+                                    <Button type="submit" variant="outline" size="icon" class="rounded-r-none border-r-0" disabled={element.block_id === 1}>
                                         <MoveUp/>
                                     </Button>
                                 </form>
-                                
-                                <Button variant="outline" size="icon" class="border-r-0 rounded-none" onclick={()=>{if(structureMap){structureMap[i].editTitleInput = !structureMap[i].editTitleInput}}}>
+                                <Button variant="outline" size="icon" class="border-r-0 rounded-none" onclick={()=>{
+                                    sidebarState.setActiveItem(element.db_id)
+                                    sidebarState.setActiveItemType(element.type)
+                                    sidebarState.setOpen(true)
+                                }}>
                                     <Edit/>
                                 </Button>
-                                <form method="post" action="blocument?/deleteSection" use:enhance>
-                                    <input type="hidden" name="deleteSectionStandardId" value={documentId}/>
-                                    <input type="hidden" name="deleteSectionId" value={element.block_id}/>
-                                    <input type="hidden" name="deleteSectionParentId" value={parentId}/>
-                                    <Button type="submit" variant="outline" size="icon" class="border-r-0 rounded-none" disabled={element.blocks.length > 0}>
+                                <div>
+                                    <Button variant="outline" size="icon" class="border-r-0 rounded-none" onclick={()=>{
+                                            deleteBlockDialogInfo.open = true
+                                            deleteBlockDialogInfo.type = element.type
+                                            deleteBlockDialogInfo.id = element.block_id
+                                        }}>
                                         <Trash/>
                                     </Button>
-                                </form>
-                                
-                                <form method="post" action="blocument?/moveElement" use:enhance>
-                                    <input type="hidden" name="moveElementStandardId" value={documentId}/>
-                                    <input type="hidden" name="moveElementId" value={element.block_id}/>
-                                    <input type="hidden" name="moveElementParentId" value={parentId}/>
-                                    <input type="hidden" name="moveElementType" value="down"/>
-                                    <Button type="submit" variant="outline" size="icon" class="rounded-l-none border" disabled={i === structure.length-1}>
+                                </div>
+                                <form method="post" action="standards?/moveElementInto" use:enhance>
+                                    <input type="hidden" name="moveElementIntoStandardId" value={documentId}/>
+                                    <input type="hidden" name="moveElementIntoId" value={element.block_id}/>
+                                    <input type="hidden" name="moveElementIntoType" value="down"/>
+                                    <Button type="submit" variant="outline" size="icon" class="rounded-l-none border">
                                         <MoveDown/>
                                     </Button>
                                 </form>
-
                             </div>
                         </div>
-                        {#if structureMap && structureMap[i].editTitleInput == true}
-                            <div class="absolute top-3 left-3">
-                                <form method="post" action="blocument?/editSectionTitle" class="flex flex-row items-center gap-2" use:enhance> 
-                                    <input type="hidden" name="editSectionStandardId" value={documentId}/>
-                                    <input type="hidden" name="editSectionId" value={element.block_id}/>
-                                    <Input type="text" name="editSectionTitle" value={element.title} class="w-48 bg-background"/>
-                                    <Button type="submit" size="icon">
-                                        <Save/>
-                                    </Button>
-                                </form>
-                            </div>
-                        {/if}
-                        <Accordion.Trigger data- class="p-4 bg-muted border-b ">
-                            {#if structureMap && structureMap[i].editTitleInput == false}
-                                <p class="text-lg">{element.title}</p>
-                            {:else if structureMap && structureMap[i].editTitleInput == true}
-                                <p class="mb-6"> </p>
-                            {:else}
-                                <LoaderCircle class="size-3 animate-spin"/>
-                            {/if}
-                        </Accordion.Trigger>
-                    </div>
-                    <Accordion.Content class="px-4 pt-2 pb-2 rounded-b-xl">
-                        {#if element.blocks.length>0}
-                            <DocumentStructure structure={element.blocks} documentId={documentId} parentId={element.block_id}/>
-                        {:else}
-                            <div class="flex flex-row items-center gap-2 pt-4">
-                                {#if structureMap && structureMap[i].addSectionToEmptySection == true}
-                                    <Button variant="outline" size="icon" onclick={()=>{if(structureMap){structureMap[i].addSectionToEmptySection = !structureMap[i].addSectionToEmptySection}}}><CircleArrowLeft/></Button>
-                                    <form method="post" action="blocument?/addSection" use:enhance class="flex flex-row gap-2">
-                                        <input type='hidden' name="addSectionStandardId" value={documentId} />
-                                        <input type='hidden' name="addSectionNeighbourId" value={undefined} />
-                                        <input type='hidden' name='addSectionPosition' value="start"/>
-                                        <input type='hidden' name='addSectionParentId' value={element.block_id}/>
-                                        <Input class="w-48" placeholder="New Section" name="addSectionTitle"/>
-                                        <Button type="submit"><ListStart/></Button>
-                                    </form>
-                                {:else}
-                                    <Button onclick={()=>{if(structureMap){structureMap[i].addSectionToEmptySection = !structureMap[i].addSectionToEmptySection}}}><Group/>Add Section</Button>
-                                {/if}
-                                <span class="text-muted-foreground font-semibold"> - or - </span> 
-                                <form method="post" action="blocument?/addBlock" use:enhance>
-                                    <input type="hidden" name="addBlockStandardId" value={documentId} />
-                                    <input type="hidden" name="addBlockNeighbourId" value={undefined} />
-                                    <input type="hidden" name="addBlockPosition" value="start"/>
-                                    <input type="hidden" name="addBlockParentId" value={element.block_id}/>
-                                    <input type="hidden" name="addBlockType" value="requirement"/>
-                                    <Button type="submit" variant="secondary"><ListChecks/> Add Requirement</Button>
-                                </form>
-                                <form method="post" action="blocument?/addBlock" use:enhance>
-                                    <input type="hidden" name="addBlockStandardId" value={documentId} />
-                                    <input type="hidden" name="addBlockNeighbourId" value={undefined} />
-                                    <input type="hidden" name="addBlockPosition" value="start"/>
-                                    <input type="hidden" name="addBlockParentId" value={element.block_id}/>
-                                    <input type="hidden" name="addBlockType" value="prose"/>
-                                    <Button type="submit" variant="secondary"><Pilcrow/> Add Prose</Button>
-                                </form>
-                                <form method="post" action="blocument?/addBlock" use:enhance>
-                                    <input type="hidden" name="addBlockStandardId" value={documentId} />
-                                    <input type="hidden" name="addBlockNeighbourId" value={undefined} />
-                                    <input type="hidden" name="addBlockPosition" value="start"/>
-                                    <input type="hidden" name="addBlockParentId" value={element.block_id}/>
-                                    <input type="hidden" name="addBlockType" value="media"/>
-                                    <Button type="submit" variant="secondary"><Image/> Add Media</Button>
-                                </form>
-                            </div>
-                        {/if}   
-                    </Accordion.Content>
-                </Accordion.Item>
-            </Accordion.Root>
-        </div>
-        {:else}
-            <div class="px-4">
-                <Card.Root>
-                    <div class="group/edit-bar-block relative w-full">
-                        <Card.Header>
-                            <div class="absolute top-8 right-8 transition-opacity duration-300 opacity-0 group-hover/edit-bar-block:opacity-100">
-                                <div class="flex flex-row ">
-                                    <form method="post" action="blocument?/moveElement" use:enhance>
-                                        <input type="hidden" name="moveElementStandardId" value={documentId}/>
-                                        <input type="hidden" name="moveElementId" value={element.block_id}/>
-                                        <input type="hidden" name="moveElementParentId" value={parentId}/>
-                                        <input type="hidden" name="moveElementType" value="up"/>
-                                        <Button type="submit" variant="outline" size="icon" class="rounded-r-none border-r-0" disabled={i === 0}>
-                                            <MoveUp/>
-                                        </Button>
-                                    </form>
-                                    <Button variant="outline" size="icon" class="border-r-0 rounded-none" onclick={()=>{if(structureMap){structureMap[i].editTitleInput = !structureMap[i].editTitleInput}}}>
-                                        <Edit/>
-                                    </Button>
-                                    <div>
-                                        <Button variant="outline" size="icon" class="border-r-0 rounded-none" onclick={()=>{
-                                                deleteBlockDialogInfo.open = true
-                                                deleteBlockDialogInfo.type = element.type
-                                                deleteBlockDialogInfo.id = element.block_id
-                                            }}>
-                                            <Trash/>
-                                        </Button>
-                                    </div>
-                                    <form method="post" action="blocument?/moveElement" use:enhance>
-                                        <input type="hidden" name="moveElementStandardId" value={documentId}/>
-                                        <input type="hidden" name="moveElementId" value={element.block_id}/>
-                                        <input type="hidden" name="moveElementParentId" value={parentId}/>
-                                        <input type="hidden" name="moveElementType" value="down"/>
-                                        <Button type="submit" variant="outline" size="icon" class="rounded-l-none border" disabled={i === structure.length-1}>
-                                            <MoveDown/>
-                                        </Button>
-                                    </form>
-                                </div>
-                            </div>
-                        
                         <div class="flex flex-row justify-between items-center">
-                            <div class="flex flex-col gap-2 w-2/3">
-                                <Card.Title class="w-full">
-                                    {element.type}
-                                </Card.Title>
-                                <Card.Description>
-                                    {element.block_id}
-                                </Card.Description>
+                            <div class="text-sm text-muted-foreground w-2/3">
+                                {#if element.type == 'requirement'}
+                                    <div class="flex flex-row gap-2 items-center">
+                                        <ListChecks class="size-4"/>
+                                        <span>Requirement (ID: {element.db_id})</span>
+                                    </div>
+                                {:else if element.type == 'prose'}
+                                    <div class="flex flex-row gap-2 items-center">
+                                        <Pilcrow class="size-4"/>
+                                        <span>Prose Block (ID: {element.db_id})</span>
+                                    </div>
+                                {:else if element.type == 'media'}
+                                    <div class="flex flex-row gap-2 items-center">
+                                        <Image class="size-4"/>
+                                        <span>Media (ID: {element.db_id})</span>
+                                    </div>
+                                {/if}
                             </div>
                             {#if element.locked.state == true}
                                 <Tooltip.Provider>
@@ -302,12 +313,16 @@
                         </div>
                     </Card.Header>
                 </div>
-                    <Card.Content>
-                        {element.db_id}
-                    </Card.Content>
-                </Card.Root>
-            </div>
-            
+                <Card.Content>
+                    {#if element.type == 'requirement'}
+                        <Requirement id={element.db_id}/>
+                    {:else if element.type == 'prose'}
+                        <Prose id={element.db_id}/>
+                    {:else if element.type == 'media'}
+                        <Media id={element.db_id}/>
+                    {/if}
+                </Card.Content>
+            </Card.Root>
         {/if}
     {/each}
     {#if structure.length == 0}
@@ -319,7 +334,7 @@
         <div class="flex flex-row items-center gap-2 p-4">
             {#if emptyPageInfo.addSection == true}
                 <Button variant="outline" size="icon" onclick={()=>{emptyPageInfo.addSection= !emptyPageInfo.addSection}}><CircleArrowLeft/></Button>
-                <form method="post" action="blocument?/addSection" use:enhance class="flex flex-row gap-2">
+                <form method="post" action="standards?/addSection" use:enhance class="flex flex-row gap-2">
                     <input type='hidden' name="addSectionStandardId" value={documentId} />
                     <input type='hidden' name="addSectionNeighbourId" value={undefined} />
                     <input type='hidden' name='addSectionPosition' value="start"/>
@@ -335,7 +350,7 @@
                 <Button onclick={()=>{emptyPageInfo.addSection = !emptyPageInfo.addSection}}><Group/>Add Section</Button>
             {/if}
             <span class="text-muted-foreground font-semibold"> - or - </span> 
-            <form method="post" action="blocument?/addBlock" use:enhance>
+            <form method="post" action="standards?/addBlock" use:enhance>
                 <input type="hidden" name="addBlockStandardId" value={documentId} />
                 <input type="hidden" name="addBlockNeighbourId" value={undefined} />
                 <input type="hidden" name="addBlockPosition" value="start"/>
@@ -343,7 +358,7 @@
                 <input type="hidden" name="addBlockType" value="requirement"/>
                 <Button type="submit" variant="secondary"><ListChecks/> Add Requirement</Button>
             </form>
-            <form method="post" action="blocument?/addBlock" use:enhance>
+            <form method="post" action="standards?/addBlock" use:enhance>
                 <input type="hidden" name="addBlockStandardId" value={documentId} />
                 <input type="hidden" name="addBlockNeighbourId" value={undefined} />
                 <input type="hidden" name="addBlockPosition" value="start"/>
@@ -351,7 +366,7 @@
                 <input type="hidden" name="addBlockType" value="prose"/>
                 <Button type="submit" variant="secondary"><Pilcrow/> Add Prose</Button>
             </form>
-            <form method="post" action="blocument?/addBlock" use:enhance>
+            <form method="post" action="standards?/addBlock" use:enhance>
                 <input type="hidden" name="addBlockStandardId" value={documentId} />
                 <input type="hidden" name="addBlockNeighbourId" value={undefined} />
                 <input type="hidden" name="addBlockPosition" value="start"/>
@@ -385,7 +400,7 @@
                                     {/if}
                                 </Button>
                                 {#if addToEndInfo.addSection == true}
-                                    <form method="post" action="blocument?/addSection" class="flex flex-row items-center p-2 gap-2" use:enhance>
+                                    <form method="post" action="standards?/addSection" class="flex flex-row items-center p-2 gap-2" use:enhance>
                                         <input type='hidden' name="addSectionStandardId" value={documentId} />
                                         <input type='hidden' name="addSectionNeighbourId" value={undefined} />
                                         <input type='hidden' name='addSectionPosition' value="end"/>
@@ -394,7 +409,7 @@
                                         <Button variant="default" type="submit"><ListStart/></Button>
                                     </form>                      
                                 {:else}
-                                    <form method="post" action="blocument?/addBlock" use:enhance>
+                                    <form method="post" action="standards?/addBlock" use:enhance>
                                         <input type="hidden" name="addBlockStandardId" value={documentId} />
                                         <input type="hidden" name="addBlockNeighbourId" value={undefined} />
                                         <input type="hidden" name="addBlockPosition" value="end"/>
@@ -402,7 +417,7 @@
                                         <input type="hidden" name="addBlockType" value="requirement"/>
                                         <Button type="submit" class="h-16 w-16 rounded-none border-t-0 border-b-0 border-l-0" variant="outline"><ListChecks/></Button>
                                     </form>
-                                    <form method="post" action="blocument?/addBlock" use:enhance>
+                                    <form method="post" action="standards?/addBlock" use:enhance>
                                         <input type="hidden" name="addBlockStandardId" value={documentId} />
                                         <input type="hidden" name="addBlockNeighbourId" value={undefined} />
                                         <input type="hidden" name="addBlockPosition" value="end"/>
@@ -410,7 +425,7 @@
                                         <input type="hidden" name="addBlockType" value="prose"/>
                                         <Button type="submit" class="h-16 w-16 rounded-none border-t-0 border-b-0 border-l-0" variant="outline"><Pilcrow/></Button>
                                     </form>
-                                    <form method="post" action="blocument?/addBlock" use:enhance>
+                                    <form method="post" action="standards?/addBlock" use:enhance>
                                         <input type="hidden" name="addBlockStandardId" value={documentId} />
                                         <input type="hidden" name="addBlockNeighbourId" value={undefined} />
                                         <input type="hidden" name="addBlockPosition" value="end"/>
@@ -447,7 +462,7 @@
         </div>
         <Dialog.Footer class="flex flex-row gap-2">
             <Button variant="secondary" onclick={()=>{deleteBlockDialogInfo.open = !deleteBlockDialogInfo.open}}>Cancel</Button>
-            <form method="post" action="blocument?/deleteBlock" use:enhance>
+            <form method="post" action="standards?/deleteBlock" use:enhance>
                 <input type="hidden" name="deleteBlockStandardId" value={documentId}/>
                 <input type="hidden" name="deleteBlockId" value={deleteBlockDialogInfo.id}/>
                 <input type="hidden" name="deleteBlockParentId" value={parentId}/>
